@@ -6,16 +6,31 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "target": "ES2021",
+    "target": "ES2023",
+    "lib": [
+      "ES2022"
+    ],
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
+    "rootDir": ".",
     "incremental": true,
     "skipLibCheck": true,
-    "strictNullChecks": false,
+    "strictNullChecks": true,
+    "strict": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "types": [
+      "vitest/globals"
+    ],
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    }
   }
 }
