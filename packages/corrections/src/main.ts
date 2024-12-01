@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { AppModule } from './app.module';
+import { Partitioners } from 'kafkajs';
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
@@ -14,10 +15,13 @@ async function bootstrap() {
         consumer: {
           groupId: 'challenge-consumer',
         },
+        producer: {
+          createPartitioner: Partitioners.LegacyPartitioner
+        }
       },
     },
   );
 
-  app.listen(() => console.log('Kafka consumer service is listening!'));
+  app.listen().then(() => console.log('Kafka consumer service is listening!'));
 }
 bootstrap();
