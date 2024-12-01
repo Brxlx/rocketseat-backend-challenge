@@ -2,7 +2,10 @@
   "name": "challenges",
   "version": "0.0.1",
   "description": "",
-  "author": "",
+  "author": {
+    "name": "Bruno Santos",
+    "email": "brcesar19@gmail.com"
+  },
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
