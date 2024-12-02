@@ -1,3 +1,4 @@
+import { PaginationParams } from '@/core/repositories/pagination-params';
 import { ChallengesRepository } from '@/domain/application/repositories/challenges.repository';
 import { Challenge } from '@/domain/enterprise/entities/Challenge';
 
@@ -18,6 +19,19 @@ export class InMemoryChallengesRepository implements ChallengesRepository {
     if (!challenge) return null;
 
     return challenge;
+  }
+
+  async findManyByTitleOrDescription(
+    titleOrDescription: string,
+    { page, itemsPerPage }: PaginationParams,
+  ): Promise<Challenge[]> {
+    return this.items
+      .filter(
+        (item) =>
+          item.title.toLowerCase().includes(titleOrDescription.toLowerCase()) ||
+          item.description.toLowerCase().includes(titleOrDescription.toLowerCase()),
+      )
+      .slice((page - 1) * itemsPerPage, page * itemsPerPage);
   }
 
   async create(challenge: Challenge): Promise<Challenge> {
