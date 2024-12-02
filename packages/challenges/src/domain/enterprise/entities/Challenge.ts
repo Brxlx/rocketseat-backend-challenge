@@ -17,6 +17,10 @@ export class Challenge extends Entity<ChallengeProps> {
     return this.props.description;
   }
 
+  set description(description: string) {
+    this.props.description = description;
+  }
+
   get createdAt() {
     return this.props.createdAt;
   }

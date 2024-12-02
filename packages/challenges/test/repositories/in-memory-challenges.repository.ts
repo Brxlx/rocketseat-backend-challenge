@@ -26,6 +26,13 @@ export class InMemoryChallengesRepository implements ChallengesRepository {
     return this.items[this.items.length - 1];
   }
 
+  async update(challenge: Challenge): Promise<Challenge> {
+    const index = this.items.findIndex((item) => item.id.equals(challenge.id));
+    this.items[index] = challenge;
+
+    return challenge;
+  }
+
   async deleteById(challenge: Challenge): Promise<void> {
     const index = this.items.findIndex((item) => item.id.equals(challenge.id));
 
