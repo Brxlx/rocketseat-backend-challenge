@@ -31,7 +31,7 @@ export class InMemoryChallengesRepository implements ChallengesRepository {
           item.title.toLowerCase().includes(titleOrDescription.toLowerCase()) ||
           item.description.toLowerCase().includes(titleOrDescription.toLowerCase()),
       )
-      .slice((page - 1) * itemsPerPage, page * itemsPerPage);
+      .slice((page! - 1) * itemsPerPage!, page! * itemsPerPage!);
   }
 
   async create(challenge: Challenge): Promise<Challenge> {
