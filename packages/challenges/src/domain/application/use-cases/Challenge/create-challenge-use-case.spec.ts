@@ -29,5 +29,23 @@ suite('[Challenge]', () => {
         inMemoryChallengesRepository.items[0].id.toString(),
       );
     });
+
+    it('should not be able to create a new challenge with same title', async () => {
+      const order1 = await makeChallenge({
+        title: 'Desafio 01',
+        description: 'Descrição do desafio 01',
+      });
+
+      const order2 = await makeChallenge({
+        title: 'Desafio 01',
+        description: 'Descrição do desafio 02',
+      });
+
+      await sut.execute(order1);
+
+      await expect(async () => {
+        await sut.execute(order2);
+      }).rejects.toThrowError('Title already exists');
+    });
   });
 });

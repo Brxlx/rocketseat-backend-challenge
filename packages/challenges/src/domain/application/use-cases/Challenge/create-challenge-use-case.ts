@@ -1,5 +1,5 @@
 import { Challenge } from '@/domain/enterprise/entities/Challenge';
-import { ChallengesRepository } from '../repositories/challenges.repository';
+import { ChallengesRepository } from '../../repositories/challenges.repository';
 import { Injectable } from '@nestjs/common';
 
 interface CreateChallengeUseCaseRequest {
