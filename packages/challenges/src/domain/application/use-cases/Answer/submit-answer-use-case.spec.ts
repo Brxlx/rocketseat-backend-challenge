@@ -29,8 +29,6 @@ suite('[Answer]', () => {
       await inMemoryChallengesRepository.create(newChallenge);
       const newAnswer = await makeAnswer({ challengeId: newChallenge.id });
 
-      console.log('****', newAnswer);
-
       // await inMemoryAnswersRepository.create(newAnswer);
 
       const result = await sut.execute({
