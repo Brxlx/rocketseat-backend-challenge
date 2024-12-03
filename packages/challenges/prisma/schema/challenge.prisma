@@ -1,0 +1,9 @@
+model Challenge {
+  id          String @id @default(uuid())
+  title       String @unique
+  description String
+
+  submissions Answer[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+}
