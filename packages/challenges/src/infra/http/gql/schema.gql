@@ -1,0 +1,24 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+"""Challenge model"""
+type Challenge {
+  id: ID!
+  title: String!
+  description: String!
+  createdAt: String!
+}
+
+type Query {
+  hello: String!
+}
+
+type Mutation {
+  createChallenge(createChallengeInput: CreateChallengeInput!): Challenge!
+}
+
+input CreateChallengeInput {
+  title: String!
+  description: String!
+}
