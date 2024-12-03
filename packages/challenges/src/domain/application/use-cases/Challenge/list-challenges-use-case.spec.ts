@@ -33,8 +33,6 @@ suite('[Challenge]', () => {
         params: { page: 1, itemsPerPage: 10 },
       });
 
-      console.log(challenges, null, 2);
-
       expect(inMemoryChallengesRepository.items).toHaveLength(2);
       expect(challenges.length).toEqual(2);
     });

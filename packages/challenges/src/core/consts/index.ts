@@ -6,6 +6,6 @@
  */
 export enum ANSWER_STATUS {
   PENDING = 'pending',
-  ACCEPTED = 'accepted',
-  REJECTED = 'rejected',
+  ERROR = 'error',
+  DONE = 'done',
 }

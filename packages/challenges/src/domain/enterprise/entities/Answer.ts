@@ -24,7 +24,7 @@ export class Answer extends Entity<AnswerProps> {
     return this.props.status;
   }
 
-  set status(value: string) {
+  set status(value: ANSWER_STATUS) {
     this.status = value ?? ANSWER_STATUS.PENDING;
   }
 
@@ -36,10 +36,11 @@ export class Answer extends Entity<AnswerProps> {
     return this.props.createdAt;
   }
 
-  static create(props: Optional<AnswerProps, 'createdAt'>, id?: UniqueEntityID) {
+  static create(props: Optional<AnswerProps, 'status' | 'createdAt'>, id?: UniqueEntityID) {
     return new Answer(
       {
         ...props,
+        status: props.status ?? ANSWER_STATUS.PENDING,
         createdAt: props.createdAt ?? new Date(),
       },
       id,
