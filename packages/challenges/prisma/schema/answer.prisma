@@ -1,0 +1,16 @@
+enum AnswerStatus {
+  PENDING
+  ERROR
+  DONE
+}
+
+model Answer {
+  id            String       @id @default(uuid())
+  challengeId   String
+  challenge     Challenge    @relation(fields: [challengeId], references: [id])
+  repositoryUrl String       @unique @map("repository_url")
+  status        AnswerStatus @default(PENDING)
+  grade         Float?
+
+  createdAt DateTime @default(now()) @map("created_at")
+}
