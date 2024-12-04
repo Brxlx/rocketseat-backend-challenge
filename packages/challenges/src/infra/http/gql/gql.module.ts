@@ -22,15 +22,6 @@ import { ChallengeResolver } from './modules/Challenge/resolvers/challenge.resol
       buildSchemaOptions: {
         dateScalarMode: 'isoDate',
       },
-      resolvers: {
-        // UUID: {
-        //   __resolveType: () => null,
-        //   // Outras configurações se necessário
-        //   parseValue: new UUIDResolver().parseValue,
-        //   serialize: new UUIDResolver().serialize,
-        //   parseLiteral: new UUIDResolver().parseLiteral,
-        // },
-      },
       formatError: (formattedError) => new GraphQLFormatErrorFilter().format(formattedError),
     }),
     DatabaseModule,
