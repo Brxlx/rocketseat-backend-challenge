@@ -23,15 +23,22 @@ export class InMemoryChallengesRepository implements ChallengesRepository {
 
   async findManyByTitleOrDescription(
     titleOrDescription: string,
-    { page, itemsPerPage }: PaginationParams,
-  ): Promise<Challenge[]> {
-    return this.items
+    { page = 1, itemsPerPage = 10 }: PaginationParams,
+  ): Promise<{ challenges: Challenge[]; total: number; page: number; itemsPerPage: number }> {
+    const challenges = this.items
       .filter(
         (item) =>
-          item.title.toLowerCase().includes(titleOrDescription.toLowerCase()) ||
-          item.description.toLowerCase().includes(titleOrDescription.toLowerCase()),
+          item.title.toLowerCase().includes(titleOrDescription!.toLowerCase()) ||
+          item.description.toLowerCase().includes(titleOrDescription!.toLowerCase()),
       )
       .slice((page! - 1) * itemsPerPage!, page! * itemsPerPage!);
+
+    return {
+      challenges,
+      total: challenges.length,
+      page,
+      itemsPerPage,
+    };
   }
 
   async create(challenge: Challenge): Promise<Challenge> {
@@ -47,8 +54,8 @@ export class InMemoryChallengesRepository implements ChallengesRepository {
     return challenge;
   }
 
-  async deleteById(challenge: Challenge): Promise<void> {
-    const index = this.items.findIndex((item) => item.id.equals(challenge.id));
+  async deleteById(id: string): Promise<void> {
+    const index = this.items.findIndex((item) => item.id.toString() === id);
 
     if (index !== -1) {
       this.items.splice(index, 1);

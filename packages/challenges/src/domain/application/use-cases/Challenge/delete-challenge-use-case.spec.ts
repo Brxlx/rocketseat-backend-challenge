@@ -21,7 +21,7 @@ suite('[Challenge]', () => {
       );
       await inMemoryChallengesRepository.create(newChallenge);
 
-      await sut.execute({ id: newChallenge.id.toString() });
+      await sut.execute(newChallenge.id.toString());
 
       expect(inMemoryChallengesRepository.items).toHaveLength(0);
       expect(inMemoryChallengesRepository.items).toHaveLength(0);
@@ -39,7 +39,7 @@ suite('[Challenge]', () => {
       await inMemoryChallengesRepository.create(order1);
 
       await expect(async () => {
-        await sut.execute({ id: 'another-id' });
+        await sut.execute('another-id');
       }).rejects.toThrowError('Challenge not found');
     });
   });
