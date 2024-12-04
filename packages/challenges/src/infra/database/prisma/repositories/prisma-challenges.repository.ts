@@ -8,17 +8,72 @@ import { PrismaChallengesMapper } from '../mappers/prisma-challenges.mapper';
 @Injectable()
 export class PrismaChallengesRepository implements ChallengesRepository {
   constructor(private readonly prisma: PrismaService) {}
-  findById(id: string): Promise<Challenge | null> {
-    throw new Error('Method not implemented.');
+  async findById(id: string): Promise<Challenge | null> {
+    const challenge = await this.prisma.challenge.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!challenge) {
+      return null;
+    }
+
+    return PrismaChallengesMapper.toDomain(challenge);
   }
-  findByTitle(title: string): Promise<Challenge | null> {
-    throw new Error('Method not implemented.');
+  async findByTitle(title: string): Promise<Challenge | null> {
+    const challenge = await this.prisma.challenge.findFirst({
+      where: {
+        title,
+      },
+    });
+
+    if (!challenge) {
+      return null;
+    }
+
+    return PrismaChallengesMapper.toDomain(challenge);
   }
-  findManyByTitleOrDescription(
-    titleOrDescription: string,
-    params: PaginationParams,
-  ): Promise<Challenge[]> {
-    throw new Error('Method not implemented.');
+  async findManyByTitleOrDescription(
+    titleOrDescription?: string,
+    params?: PaginationParams,
+  ): Promise<{ challenges: Challenge[]; total: number; page: number; itemsPerPage: number }> {
+    const page = params?.page || 1;
+    const itemsPerPage = params?.itemsPerPage || 10;
+    const skip = (page - 1) * itemsPerPage;
+    const take = itemsPerPage;
+
+    const challenges = await this.prisma.challenge.findMany({
+      where: {
+        OR: [
+          titleOrDescription
+            ? {
+                title: {
+                  contains: titleOrDescription,
+                  mode: 'insensitive',
+                },
+              }
+            : {},
+          titleOrDescription
+            ? {
+                description: {
+                  contains: titleOrDescription,
+                  mode: 'insensitive',
+                },
+              }
+            : {},
+        ],
+      },
+      skip,
+      take,
+    });
+
+    return {
+      challenges: challenges.map(PrismaChallengesMapper.toDomain),
+      total: challenges.length,
+      page,
+      itemsPerPage,
+    };
   }
   async create(challenge: Challenge): Promise<Challenge> {
     const prismaChallenge = await this.prisma.challenge.create({
@@ -27,10 +82,23 @@ export class PrismaChallengesRepository implements ChallengesRepository {
 
     return PrismaChallengesMapper.toDomain(prismaChallenge);
   }
-  update(challenge: Challenge): Promise<Challenge> {
-    throw new Error('Method not implemented.');
+  async update(challenge: Challenge): Promise<Challenge> {
+    const prismaChallenge = PrismaChallengesMapper.toPrisma(challenge);
+
+    const updatedChallenge = await this.prisma.challenge.update({
+      where: {
+        id: prismaChallenge.id,
+      },
+      data: prismaChallenge,
+    });
+
+    return PrismaChallengesMapper.toDomain(updatedChallenge);
   }
-  deleteById(challenge: Challenge): Promise<void> {
-    throw new Error('Method not implemented.');
+  async deleteById(id: string): Promise<void> {
+    await this.prisma.challenge.delete({
+      where: {
+        id,
+      },
+    });
   }
 }

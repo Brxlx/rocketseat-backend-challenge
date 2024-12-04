@@ -7,15 +7,37 @@ type Challenge {
   id: ID!
   title: String!
   description: String!
-  createdAt: String!
+  createdAt: DateTime!
 }
 
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type ListChallengesResponse {
+  challenges: [Challenge!]!
+  total: Int!
+  page: Int!
+  itemsPerPage: Int!
+}
+
+"""Custom UUID scalar type"""
+scalar UUID
+
 type Query {
-  hello: String!
+  listChallenges(listChallengesFiltersInput: ListChallengesFiltersInput!): ListChallengesResponse!
+}
+
+input ListChallengesFiltersInput {
+  titleOrDescription: String
+  page: Float = 1
+  itemsPerPage: Float = 10
 }
 
 type Mutation {
-  createChallenge(createChallengeInput: CreateChallengeInput!): Challenge!
+  createChallenge(createChallengeInput: CreateChallengeInput!): String!
+  deleteChallenge(id: String!): Boolean
 }
 
 input CreateChallengeInput {

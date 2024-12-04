@@ -5,14 +5,12 @@ export class Challenge {
   @Field(() => ID)
   id!: string;
 
-  @Field()
+  @Field(() => String)
   title!: string;
 
-  @Field()
+  @Field(() => String)
   description!: string;
 
-  // TODO: ADD relation to Answer
-
-  @Field()
-  createdAt!: string;
+  @Field(() => Date)
+  createdAt!: Date;
 }

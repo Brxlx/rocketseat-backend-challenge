@@ -4,11 +4,16 @@ import { ChallengesRepository } from '../../repositories/challenges.repository';
 import { PaginationParams } from '@/core/repositories/pagination-params';
 
 interface ListChallengeUseCaseRequest {
-  titleOrDescription: string;
+  titleOrDescription?: string;
   params?: PaginationParams;
 }
 
-type ListChallengeUseCaseResponse = { challenges: Challenge[] };
+type ListChallengeUseCaseResponse = {
+  challenges: Challenge[];
+  total: number;
+  page: number;
+  itemsPerPage: number;
+};
 
 @Injectable()
 export class ListChallengesUseCase {
@@ -18,11 +23,19 @@ export class ListChallengesUseCase {
     titleOrDescription,
     params: { page = 1, itemsPerPage = 10 } = {},
   }: ListChallengeUseCaseRequest): Promise<ListChallengeUseCaseResponse> {
-    const challenges = await this.challengesRepository.findManyByTitleOrDescription(
+    const response = await this.challengesRepository.findManyByTitleOrDescription(
       titleOrDescription,
-      { page, itemsPerPage },
+      {
+        page,
+        itemsPerPage,
+      },
     );
 
-    return { challenges };
+    return {
+      challenges: response.challenges,
+      total: response.challenges.length,
+      page: response.page,
+      itemsPerPage: response.itemsPerPage,
+    };
   }
 }
