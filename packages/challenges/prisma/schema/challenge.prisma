@@ -6,4 +6,6 @@ model Challenge {
   submissions Answer[]
 
   createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("challenge")
 }
