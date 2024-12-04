@@ -9,6 +9,9 @@ import { DeleteChallengeUseCase } from '@/domain/application/use-cases/Challenge
 import { ChallengePresenter } from '../presenters/challenge.presenter';
 import { ListChallengesFiltersInput } from '../inputs/list-challenges-filters.input';
 import { CreateChallengeInput } from '../inputs/create-challenge.input';
+import { EditChallengeUseCase } from '@/domain/application/use-cases/Challenge/edit-challenge-use-case';
+import { EditChallengeInput } from '../inputs/edit-challenge.input';
+import { EditChallengeResponse } from '../responses/edit-challenge.response';
 
 @Resolver(() => Challenge)
 export class ChallengeResolver {
@@ -16,6 +19,7 @@ export class ChallengeResolver {
     private createChallengeUseCase: CreateChallengeUseCase,
     private listChallengesUseCase: ListChallengesUseCase,
     private deleteChallengeUseCase: DeleteChallengeUseCase,
+    private editChallengeUseCase: EditChallengeUseCase,
   ) {}
 
   @Query(() => ListChallengesResponse)
@@ -41,6 +45,17 @@ export class ChallengeResolver {
     const { challenge } = await this.createChallengeUseCase.execute(createChallengeInput);
 
     return challenge.id.toString();
+  }
+
+  @Mutation(() => EditChallengeResponse)
+  public async updateChallenge(@Args('editChallengeInput') editChallengeInput: EditChallengeInput) {
+    const updatedChallenge = await this.editChallengeUseCase.execute({
+      id: editChallengeInput.id,
+      title: editChallengeInput.title ?? undefined,
+      description: editChallengeInput.description ?? undefined,
+    });
+
+    return { challenge: ChallengePresenter.toHTTP(updatedChallenge.challenge) };
   }
 
   @Mutation(() => Boolean, { nullable: true })

@@ -13,6 +13,10 @@ export class Challenge extends Entity<ChallengeProps> {
     return this.props.title;
   }
 
+  set title(title: string) {
+    this.props.title = title;
+  }
+
   get description() {
     return this.props.description;
   }

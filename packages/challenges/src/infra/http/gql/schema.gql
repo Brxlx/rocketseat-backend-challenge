@@ -22,6 +22,10 @@ type ListChallengesResponse {
   itemsPerPage: Int!
 }
 
+type EditChallengeResponse {
+  challenge: Challenge!
+}
+
 """Custom UUID scalar type"""
 scalar UUID
 
@@ -37,10 +41,17 @@ input ListChallengesFiltersInput {
 
 type Mutation {
   createChallenge(createChallengeInput: CreateChallengeInput!): String!
+  updateChallenge(editChallengeInput: EditChallengeInput!): EditChallengeResponse!
   deleteChallenge(id: String!): Boolean
 }
 
 input CreateChallengeInput {
   title: String!
   description: String!
+}
+
+input EditChallengeInput {
+  id: ID!
+  title: String
+  description: String
 }

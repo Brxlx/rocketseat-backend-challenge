@@ -4,7 +4,8 @@ import { Challenge } from '@/domain/enterprise/entities/Challenge';
 
 interface EditChallengeUseCaseRequest {
   id: string;
-  description: string;
+  title?: string;
+  description?: string;
 }
 
 type EditChallengeUseCaseResponse = { challenge: Challenge };
@@ -15,16 +16,28 @@ export class EditChallengeUseCase {
 
   public async execute({
     id,
+    title,
     description,
   }: EditChallengeUseCaseRequest): Promise<EditChallengeUseCaseResponse> {
     const challenge = await this.challengesRepository.findById(id);
 
     if (!challenge) throw new Error('Challenge not found');
 
-    challenge.description = description;
+    if (title) {
+      // Check if title is a defined argument and update its value on class level
+      const checkIfTitleAlreadyExists = await this.challengesRepository.findByTitle(title);
+      if (checkIfTitleAlreadyExists) throw new Error('Title already in use');
+      challenge.title = title;
+    }
 
-    await this.challengesRepository.update(challenge);
+    // Check if description is a defined argument and update its value on class level
+    if (description) challenge.description = description;
 
-    return { challenge };
+    // Save changes to database
+    const updatedChallenge = await this.challengesRepository.update(challenge);
+
+    console.log(updatedChallenge);
+
+    return { challenge: updatedChallenge };
   }
 }
