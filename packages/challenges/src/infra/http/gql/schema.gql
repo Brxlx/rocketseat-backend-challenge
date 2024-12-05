@@ -85,6 +85,7 @@ type Mutation {
   createChallenge(createChallengeInput: CreateChallengeInput!): String!
   updateChallenge(editChallengeInput: EditChallengeInput!): EditChallengeResponse!
   deleteChallenge(id: String!): Boolean
+  submitAnswer(submitAnswerInput: SubmitAnswerInput!): Answer!
 }
 
 input CreateChallengeInput {
@@ -96,4 +97,9 @@ input EditChallengeInput {
   id: ID!
   title: String
   description: String
+}
+
+input SubmitAnswerInput {
+  challengeId: String!
+  repositoryUrl: String!
 }

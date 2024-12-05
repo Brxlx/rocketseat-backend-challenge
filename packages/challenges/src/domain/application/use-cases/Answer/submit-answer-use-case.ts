@@ -9,7 +9,7 @@ interface SubmitAnswerUseCaseRequest {
   challengeId: string;
   repositoryUrl: string;
   grade?: number | null;
-  status: ANSWER_STATUS;
+  status?: ANSWER_STATUS;
 }
 
 type SubmitAnswerUseCaseResponse = { answer: Answer };

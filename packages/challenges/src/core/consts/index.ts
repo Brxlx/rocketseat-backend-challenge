@@ -5,7 +5,7 @@
  * @property {string} REJECTED - The submission has been rejected.
  */
 export enum ANSWER_STATUS {
-  PENDING = 'pending',
-  ERROR = 'error',
-  DONE = 'done',
+  PENDING = 'PENDING',
+  ERROR = 'ERROR',
+  DONE = 'DONE',
 }

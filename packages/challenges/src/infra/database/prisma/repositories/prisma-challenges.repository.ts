@@ -62,16 +62,18 @@ export class PrismaChallengesRepository implements ChallengesRepository {
         },
       ];
     }
-
-    const challenges = await this.prisma.challenge.findMany({
-      where,
-      skip,
-      take,
-    });
+    const [challenges, total] = await Promise.all([
+      this.prisma.challenge.findMany({
+        where,
+        skip,
+        take,
+      }),
+      this.prisma.challenge.count(),
+    ]);
 
     return {
       challenges: challenges.map(PrismaChallengesMapper.toDomain),
-      total: challenges.length,
+      total,
       page,
       itemsPerPage,
     };
