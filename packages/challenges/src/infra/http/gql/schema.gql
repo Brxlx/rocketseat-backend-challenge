@@ -26,17 +26,59 @@ type EditChallengeResponse {
   challenge: Challenge!
 }
 
+"""Answer model"""
+type Answer {
+  id: ID!
+  challengeId: String!
+  repositoryUrl: String!
+  status: ANSWER_STATUS!
+  grade: Int!
+  createdAt: DateTime!
+}
+
+"""Available statuses for answer submissions"""
+enum ANSWER_STATUS {
+  PENDING
+  ERROR
+  DONE
+}
+
+type ListAnswersResponse {
+  answers: [Answer!]!
+  total: Int!
+  page: Int!
+  itemsPerPage: Int!
+}
+
 """Custom UUID scalar type"""
 scalar UUID
 
 type Query {
   listChallenges(listChallengesFiltersInput: ListChallengesFiltersInput!): ListChallengesResponse!
+  listAnswers(listAnswesInput: ListAnswersInput!): ListAnswersResponse!
 }
 
 input ListChallengesFiltersInput {
   titleOrDescription: String
   page: Float = 1
   itemsPerPage: Float = 10
+}
+
+input ListAnswersInput {
+  filters: FiltersInput
+  params: ParamsInput
+}
+
+input FiltersInput {
+  challengeId: String
+  startDate: DateTime
+  endDate: DateTime
+  status: String
+}
+
+input ParamsInput {
+  page: Float
+  itemsPerPage: Float
 }
 
 type Mutation {

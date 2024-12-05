@@ -9,6 +9,8 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 import { GraphQLFormatErrorFilter } from '@/infra/filters/GqlFormatError.filter';
 import { UUIDResolver } from './modules/Challenge/resolvers/uuid-scalar.resolver';
 import { ChallengeResolver } from './modules/Challenge/resolvers/challenge.resolver';
+import { AnswerResolver } from './modules/Answer/resolvers/answer.resolver';
+import { AnswerModule } from './modules/Answer/answer.module';
 
 @Module({
   imports: [
@@ -26,8 +28,9 @@ import { ChallengeResolver } from './modules/Challenge/resolvers/challenge.resol
     }),
     DatabaseModule,
     ChallengeModule,
+    AnswerModule,
   ],
-  providers: [UUIDResolver, ChallengeResolver],
-  exports: [UUIDResolver, ChallengeResolver],
+  providers: [UUIDResolver, ChallengeResolver, AnswerResolver],
+  exports: [UUIDResolver, ChallengeResolver, AnswerResolver],
 })
 export class GqlModule {}
