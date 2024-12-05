@@ -14,8 +14,11 @@ export class InMemoryAnswersRepository implements AnswersRepository {
     return answer;
   }
 
-  async findManyByFilters(filters: AnswerFilters, params: PaginationParams): Promise<Answer[]> {
-    return this.items
+  async findManyByFilters(
+    filters: AnswerFilters,
+    { page = 1, itemsPerPage = 10 }: PaginationParams,
+  ): Promise<{ answers: Answer[]; total: number; page: number; itemsPerPage: number }> {
+    const answers = this.items
       .filter((item) => {
         // Filtro por challengeId
         const matchesChallengeId = filters.challengeId
@@ -34,7 +37,14 @@ export class InMemoryAnswersRepository implements AnswersRepository {
         // Combina todos os filtros
         return matchesChallengeId && matchesStatus && matchesDateRange;
       })
-      .slice((params.page! - 1) * 20, params.page! * 20);
+      .slice((page - 1) * 20, page * 20);
+
+    return {
+      answers,
+      total: answers.length,
+      page,
+      itemsPerPage,
+    };
   }
 
   // Método auxiliar para comparação de datas ignorando horas e usando UTC
