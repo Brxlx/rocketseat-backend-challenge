@@ -73,7 +73,7 @@ input FiltersInput {
   challengeId: String
   startDate: DateTime
   endDate: DateTime
-  status: String
+  status: ANSWER_STATUS
 }
 
 input ParamsInput {

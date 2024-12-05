@@ -1,7 +1,9 @@
 import { ANSWER_STATUS } from '@/core/consts';
 import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 import { Answer, AnswerProps } from '@/domain/enterprise/entities/Answer';
+import { PrismaService } from '@/infra/database/prisma/prisma.service';
 import { faker } from '@faker-js/faker/locale/pt_BR';
+import { Injectable } from '@nestjs/common';
 
 export async function makeAnswer(override: Partial<AnswerProps> = {}, id?: UniqueEntityID) {
   return Answer.create(
@@ -14,4 +16,9 @@ export async function makeAnswer(override: Partial<AnswerProps> = {}, id?: Uniqu
     },
     id,
   );
+}
+
+@Injectable()
+export class AnswerFactory {
+  constructor(private readonly prisma: PrismaService) {}
 }

@@ -1,5 +1,5 @@
-import { ANSWER_STATUS } from '@/core/consts';
 import { Field, InputType } from '@nestjs/graphql';
+import { GQL_ANSWER_STATUS_ENUM } from '../resolvers/register-answer-enum';
 
 @InputType()
 export class FiltersInput {
@@ -12,6 +12,6 @@ export class FiltersInput {
   @Field(() => Date, { nullable: true })
   endDate?: Date;
 
-  @Field({ nullable: true })
-  status?: ANSWER_STATUS;
+  @Field(() => GQL_ANSWER_STATUS_ENUM, { nullable: true })
+  status?: GQL_ANSWER_STATUS_ENUM;
 }
