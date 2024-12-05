@@ -49,21 +49,24 @@ export class PrismaAnswersRepository implements AnswersRepository {
       };
     }
 
-    const answers = await this.prisma.answer.findMany({
-      where,
-      orderBy: {
-        createdAt: 'desc',
-      },
-      take,
-      skip,
-      include: {
-        challenge: { select: { id: true } },
-      },
-    });
+    const [answers, totalRows] = await Promise.all([
+      this.prisma.answer.findMany({
+        where,
+        orderBy: {
+          createdAt: 'desc',
+        },
+        take,
+        skip,
+        include: {
+          challenge: { select: { id: true } },
+        },
+      }),
+      this.prisma.answer.count(),
+    ]);
 
     return {
       answers: answers.map(PrismaAnswersMapper.toDomain),
-      total: answers.length,
+      total: totalRows,
       page,
       itemsPerPage,
     };

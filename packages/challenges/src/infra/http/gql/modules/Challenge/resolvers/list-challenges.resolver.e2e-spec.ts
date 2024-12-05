@@ -5,12 +5,10 @@ import { ChallengeFactory } from 'test/factories/make-challenge.factory';
 
 import { AppModule } from '@/infra/app.module';
 import { DatabaseModule } from '@/infra/database/database.module';
-import { PrismaService } from '@/infra/database/prisma/prisma.service';
 
 suite('[Challenge] (E2E)', () => {
   describe('List challenge', () => {
     let app: INestApplication;
-    let prisma: PrismaService;
     let challengeFactory: ChallengeFactory;
 
     beforeAll(async () => {
@@ -20,7 +18,6 @@ suite('[Challenge] (E2E)', () => {
       }).compile();
 
       app = moduleRef.createNestApplication();
-      prisma = moduleRef.get(PrismaService);
       challengeFactory = moduleRef.get(ChallengeFactory);
 
       await app.init();
