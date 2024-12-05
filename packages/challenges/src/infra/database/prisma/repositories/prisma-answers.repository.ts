@@ -32,26 +32,33 @@ export class PrismaAnswersRepository implements AnswersRepository {
     const skip = (page - 1) * itemsPerPage;
     const take = itemsPerPage;
 
+    const where: Prisma.AnswerWhereInput = {};
+
+    if (filters.challengeId) {
+      where.challengeId = filters.challengeId;
+    }
+
+    if (filters.status) {
+      where.status = filters.status.toString() as Prisma.EnumAnswerStatusFilter;
+    }
+
+    if (filters.startDate || filters.endDate) {
+      where.createdAt = {
+        gte: filters.startDate,
+        lte: filters.endDate,
+      };
+    }
+
     const answers = await this.prisma.answer.findMany({
-      where: {
-        ...(filters.challengeId && {
-          challengeId: filters.challengeId,
-        }),
-        ...(filters.status && {
-          status: filters.status.toString() as Prisma.EnumAnswerStatusFilter,
-        }),
-        ...(filters.startDate && {
-          startDate: filters.startDate,
-        }),
-        ...(filters.endDate && {
-          endDate: filters.endDate,
-        }),
-      },
+      where,
       orderBy: {
         createdAt: 'desc',
       },
       take,
       skip,
+      include: {
+        challenge: { select: { id: true } },
+      },
     });
 
     return {

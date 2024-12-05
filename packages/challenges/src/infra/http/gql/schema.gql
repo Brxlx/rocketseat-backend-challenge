@@ -32,7 +32,7 @@ type Answer {
   challengeId: String!
   repositoryUrl: String!
   status: ANSWER_STATUS!
-  grade: Int!
+  grade: Int
   createdAt: DateTime!
 }
 

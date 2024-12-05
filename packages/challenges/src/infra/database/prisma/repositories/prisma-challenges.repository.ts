@@ -4,6 +4,7 @@ import { Challenge } from '@/domain/enterprise/entities/Challenge';
 import { PrismaService } from '../prisma.service';
 import { Injectable } from '@nestjs/common';
 import { PrismaChallengesMapper } from '../mappers/prisma-challenges.mapper';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PrismaChallengesRepository implements ChallengesRepository {
@@ -43,27 +44,27 @@ export class PrismaChallengesRepository implements ChallengesRepository {
     const skip = (page - 1) * itemsPerPage;
     const take = itemsPerPage;
 
+    const where: Prisma.ChallengeWhereInput = {};
+
+    if (titleOrDescription) {
+      where.OR = [
+        {
+          title: {
+            contains: titleOrDescription,
+            mode: 'insensitive',
+          },
+        },
+        {
+          description: {
+            contains: titleOrDescription,
+            mode: 'insensitive',
+          },
+        },
+      ];
+    }
+
     const challenges = await this.prisma.challenge.findMany({
-      where: {
-        OR: [
-          titleOrDescription
-            ? {
-                title: {
-                  contains: titleOrDescription,
-                  mode: 'insensitive',
-                },
-              }
-            : {},
-          titleOrDescription
-            ? {
-                description: {
-                  contains: titleOrDescription,
-                  mode: 'insensitive',
-                },
-              }
-            : {},
-        ],
-      },
+      where,
       skip,
       take,
     });

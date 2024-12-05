@@ -13,10 +13,10 @@ export class Answer {
   repositoryUrl!: string;
 
   @Field(() => GQL_ANSWER_STATUS_ENUM)
-  status!: GQL_ANSWER_STATUS_ENUM;
+  status!: typeof GQL_ANSWER_STATUS_ENUM;
 
-  @Field(() => Int)
-  grade!: number;
+  @Field(() => Int, { nullable: true })
+  grade?: number;
 
   @Field(() => Date)
   createdAt!: Date;

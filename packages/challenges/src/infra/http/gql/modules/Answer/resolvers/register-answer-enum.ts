@@ -1,11 +1,11 @@
 import { ANSWER_STATUS } from '@/core/consts';
 import { registerEnumType } from '@nestjs/graphql';
 
-export enum GQL_ANSWER_STATUS_ENUM {
-  PENDING = ANSWER_STATUS.PENDING,
-  ERROR = ANSWER_STATUS.ERROR,
-  DONE = ANSWER_STATUS.DONE,
-}
+export const GQL_ANSWER_STATUS_ENUM = {
+  PENDING: ANSWER_STATUS.PENDING.toUpperCase(),
+  ERROR: ANSWER_STATUS.ERROR.toUpperCase(),
+  DONE: ANSWER_STATUS.DONE.toUpperCase(),
+} as const;
 
 registerEnumType(GQL_ANSWER_STATUS_ENUM, {
   name: 'ANSWER_STATUS',

@@ -4,7 +4,7 @@ export class AnswerPresenter {
   static toHTTP(answer: Answer) {
     return {
       id: answer.id.toString(),
-      challengeId: answer.challengeId,
+      challengeId: answer.challengeId.toString(),
       repositoryUrl: answer.repositoryUrl,
       grade: answer.grade,
       status: answer.status,
