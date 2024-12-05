@@ -36,8 +36,6 @@ export class EditChallengeUseCase {
     // Save changes to database
     const updatedChallenge = await this.challengesRepository.update(challenge);
 
-    console.log(updatedChallenge);
-
     return { challenge: updatedChallenge };
   }
 }

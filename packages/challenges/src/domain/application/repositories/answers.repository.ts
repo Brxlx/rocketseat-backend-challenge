@@ -4,6 +4,9 @@ import { Answer } from '@/domain/enterprise/entities/Answer';
 
 export abstract class AnswersRepository {
   abstract findById(id: string): Promise<Answer | null>;
-  abstract findManyByFilters(filters: AnswerFilters, params: PaginationParams): Promise<Answer[]>;
+  abstract findManyByFilters(
+    filters: AnswerFilters,
+    params: PaginationParams,
+  ): Promise<{ answers: Answer[]; total: number; page: number; itemsPerPage: number }>;
   abstract create(answer: Answer): Promise<Answer>;
 }

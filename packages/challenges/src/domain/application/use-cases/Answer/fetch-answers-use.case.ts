@@ -10,7 +10,12 @@ interface FetchAnswersUseCaseRequest {
   params?: PaginationParams;
 }
 
-type FetchAnswersUseCaseResponse = { answers: Answer[] };
+type FetchAnswersUseCaseResponse = {
+  answers: Answer[];
+  total: number;
+  page: number;
+  itemsPerPage: number;
+};
 
 @Injectable()
 export class FetchAnswersUseCase {
@@ -25,12 +30,17 @@ export class FetchAnswersUseCase {
   }: FetchAnswersUseCaseRequest): Promise<FetchAnswersUseCaseResponse> {
     if (filters?.challengeId) await this.verifyChallengeId(filters.challengeId);
 
-    const answers = await this.answersRepository.findManyByFilters(filters ?? {}, {
+    const result = await this.answersRepository.findManyByFilters(filters ?? {}, {
       page,
       itemsPerPage,
     });
 
-    return { answers };
+    return {
+      answers: result.answers,
+      total: result.total,
+      page: result.page,
+      itemsPerPage: result.itemsPerPage,
+    };
   }
 
   private async verifyChallengeId(challengeId: string): Promise<boolean> {

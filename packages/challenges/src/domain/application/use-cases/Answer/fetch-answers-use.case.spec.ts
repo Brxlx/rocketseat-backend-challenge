@@ -40,10 +40,9 @@ suite('[Answer]', () => {
         params: { page: 1 },
       });
 
-      console.log('dados ->', result);
-
       expect(result).toBeTruthy();
       expect(result.answers).toHaveLength(2);
+      expect(inMemoryAnswersRepository.items).toHaveLength(2);
       expect(result.answers).toEqual([answer1, answer2]);
       expect(result.answers[0].challengeId.toString()).toEqual(newChallenge.id.toString());
     });
