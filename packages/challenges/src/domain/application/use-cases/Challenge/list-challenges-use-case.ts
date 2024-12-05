@@ -33,7 +33,7 @@ export class ListChallengesUseCase {
 
     return {
       challenges: response.challenges,
-      total: response.challenges.length,
+      total: response.total,
       page: response.page,
       itemsPerPage: response.itemsPerPage,
     };

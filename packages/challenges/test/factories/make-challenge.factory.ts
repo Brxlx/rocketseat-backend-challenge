@@ -22,7 +22,6 @@ export class ChallengeFactory {
 
   public async makePrismaChallenge(data: Partial<ChallengeProps> = {}, id?: UniqueEntityID) {
     const challenge = await makeChallenge(data, id);
-    console.log(challenge);
 
     await this.prisma.challenge.create({
       data: PrismaChallengesMapper.toPrisma(challenge),

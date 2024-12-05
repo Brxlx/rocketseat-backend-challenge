@@ -39,10 +39,12 @@ export class PrismaChallengesRepository implements ChallengesRepository {
     titleOrDescription?: string,
     params?: PaginationParams,
   ): Promise<{ challenges: Challenge[]; total: number; page: number; itemsPerPage: number }> {
-    const page = params?.page || 1;
-    const itemsPerPage = params?.itemsPerPage || 10;
+    const page = params?.page ?? 1;
+    const itemsPerPage = params?.itemsPerPage ?? 10;
     const skip = (page - 1) * itemsPerPage;
     const take = itemsPerPage;
+
+    console.log(page, itemsPerPage, skip, take);
 
     const where: Prisma.ChallengeWhereInput = {};
 
@@ -62,18 +64,22 @@ export class PrismaChallengesRepository implements ChallengesRepository {
         },
       ];
     }
-    const [challenges, total] = await Promise.all([
+    console.log(where);
+    const [challenges, totalRows] = await Promise.all([
       this.prisma.challenge.findMany({
         where,
         skip,
         take,
+        orderBy: {
+          id: 'asc',
+        },
       }),
       this.prisma.challenge.count(),
     ]);
 
     return {
       challenges: challenges.map(PrismaChallengesMapper.toDomain),
-      total,
+      total: totalRows,
       page,
       itemsPerPage,
     };
