@@ -25,11 +25,15 @@ export class Answer extends Entity<AnswerProps> {
   }
 
   set status(value: ANSWER_STATUS) {
-    this.status = value ?? ANSWER_STATUS.PENDING;
+    this.props.status = value ?? ANSWER_STATUS.PENDING;
   }
 
   get grade() {
     return this.props.grade;
+  }
+
+  set grade(value: number | null | undefined) {
+    this.props.grade = value ?? null;
   }
 
   get createdAt() {

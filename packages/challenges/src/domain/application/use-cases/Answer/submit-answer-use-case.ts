@@ -4,6 +4,7 @@ import { Answer } from '@/domain/enterprise/entities/Answer';
 import { ANSWER_STATUS } from '@/core/consts';
 import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 import { ChallengesRepository } from '../../repositories/challenges.repository';
+import { Producer } from '../../gateways/Messaging/producer';
 
 interface SubmitAnswerUseCaseRequest {
   challengeId: string;
@@ -19,6 +20,7 @@ export class SubmitAnswerUseCase {
   constructor(
     private readonly answersRepository: AnswersRepository,
     private readonly challengesRepository: ChallengesRepository,
+    private readonly producer: Producer,
   ) {}
 
   public async execute({
@@ -27,9 +29,7 @@ export class SubmitAnswerUseCase {
     grade,
     status,
   }: SubmitAnswerUseCaseRequest): Promise<SubmitAnswerUseCaseResponse> {
-    const verifiyChallengeId = await this.challengesRepository.findById(challengeId);
-
-    if (!verifiyChallengeId) throw new Error('Challenge not found');
+    await this.validateChallenge(challengeId);
 
     this.validateGitHubRepository(repositoryUrl);
 
@@ -39,9 +39,21 @@ export class SubmitAnswerUseCase {
       grade,
       status,
     });
+
     const answer = await this.answersRepository.create(newAnswer);
 
+    const updatedAnswer = await this.producer.produce('challenge.correction', answer);
+
+    // await this.producer.(updatedAnswer);
+
     return { answer };
+  }
+
+  private async validateChallenge(challengeId: string): Promise<void> {
+    const challenge = await this.challengesRepository.findById(challengeId);
+    if (!challenge) {
+      throw new Error('Challenge not found');
+    }
   }
 
   private validateGitHubRepository(url: string): boolean {
