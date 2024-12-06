@@ -7,6 +7,12 @@ import { AnswerPresenter } from '../presenters/answer.presenter';
 import { ListAnswersResponse } from '../rersponses/list-answers.response';
 import { SubmitAnswerInput } from '../inputs/submit-answer.input';
 import { ANSWER_STATUS } from '@/core/consts';
+import { ChallengeNotFoundError } from '@/domain/application/use-cases/errors/challenge-not-found.error';
+import { ChallengeNotFoundGraphQLError } from '../../../errors/challenge-not-found-gql.error';
+import { EmptyGithubUrlError } from '@/domain/application/use-cases/errors/empty-github-url.error';
+import { EmptyGithubUrlGraphQLError } from '../../../errors/empty-github-url-gql.error';
+import { InvalidGithubUrlError } from '@/domain/application/use-cases/errors/invalid-github-url.error';
+import { InvalidGithubUrlGraphQLError } from '../../../errors/invalid-github-url-gql.error';
 
 @Resolver(() => Answer)
 export class AnswerResolver {
@@ -30,8 +36,26 @@ export class AnswerResolver {
 
   @Mutation(() => Answer)
   public async submitAnswer(@Args('submitAnswerInput') submitAnswerInput: SubmitAnswerInput) {
-    const { answer } = await this.submitAnswerUseCase.execute(submitAnswerInput);
+    try {
+      const { answer } = await this.submitAnswerUseCase.execute(submitAnswerInput);
 
-    return AnswerPresenter.toHTTP(answer);
+      return AnswerPresenter.toHTTP(answer);
+    } catch (err: any) {
+      this.handleResolverError(err);
+    }
+  }
+
+  private handleResolverError(err: any) {
+    if (err instanceof ChallengeNotFoundError) {
+      throw new ChallengeNotFoundGraphQLError();
+    }
+
+    if (err instanceof EmptyGithubUrlError) {
+      throw new EmptyGithubUrlGraphQLError();
+    }
+
+    if (err instanceof InvalidGithubUrlError) {
+      throw new InvalidGithubUrlGraphQLError();
+    }
   }
 }

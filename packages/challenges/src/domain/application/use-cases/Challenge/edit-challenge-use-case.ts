@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ChallengesRepository } from '../../repositories/challenges.repository';
 import { Challenge } from '@/domain/enterprise/entities/Challenge';
+import { ChallengeNotFoundError } from '../errors/challenge-not-found.error';
+import { TitleAlreadyExistsError } from '../errors/title-already-exists.error';
 
 interface EditChallengeUseCaseRequest {
   id: string;
@@ -21,12 +23,12 @@ export class EditChallengeUseCase {
   }: EditChallengeUseCaseRequest): Promise<EditChallengeUseCaseResponse> {
     const challenge = await this.challengesRepository.findById(id);
 
-    if (!challenge) throw new Error('Challenge not found');
+    if (!challenge) throw new ChallengeNotFoundError();
 
     if (title) {
       // Check if title is a defined argument and update its value on class level
       const checkIfTitleAlreadyExists = await this.challengesRepository.findByTitle(title);
-      if (checkIfTitleAlreadyExists) throw new Error('Title already in use');
+      if (checkIfTitleAlreadyExists) throw new TitleAlreadyExistsError();
       challenge.title = title;
     }
 

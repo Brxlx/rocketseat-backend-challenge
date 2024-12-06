@@ -40,7 +40,7 @@ suite('[Challenge]', () => {
 
       await expect(async () => {
         await sut.execute('another-id');
-      }).rejects.toThrowError('Challenge not found');
+      }).rejects.toThrowError('Invalid Challenge ID');
     });
   });
 });

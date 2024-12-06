@@ -4,6 +4,7 @@ import { Answer } from '@/domain/enterprise/entities/Answer';
 import { AnswerFilters } from '@/core/repositories/answer-filters';
 import { PaginationParams } from '@/core/repositories/pagination-params';
 import { ChallengesRepository } from '../../repositories/challenges.repository';
+import { ChallengeNotFoundError } from '../errors/challenge-not-found.error';
 
 interface FetchAnswersUseCaseRequest {
   filters?: AnswerFilters;
@@ -46,7 +47,7 @@ export class FetchAnswersUseCase {
   private async verifyChallengeId(challengeId: string): Promise<boolean> {
     const verifiyChallengeId = await this.challengesRepository.findById(challengeId);
 
-    if (!verifiyChallengeId) throw new Error('Challenge not found');
+    if (!verifiyChallengeId) throw new ChallengeNotFoundError();
 
     return true;
   }
