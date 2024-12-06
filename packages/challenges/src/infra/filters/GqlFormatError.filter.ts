@@ -63,11 +63,21 @@ export class GraphQLFormatErrorFilter {
   }
 
   private extractStatus(error: GraphQLFormattedError, extensions?: GraphQLErrorExtensions): number {
-    return (
+    // Priorize a busca do status nas diferentes camadas de extensões
+    const status =
+      // Primeiro, tente capturar o status das extensões do GraphQL
+      (extensions as any)?.status ||
+      // Em seguida, verifique no objeto exception
       (extensions as any)?.exception?.status ||
+      // Depois, verifique no response dentro do exception
       (extensions as any)?.exception?.response?.statusCode ||
+      // Verifique o statusCode direto no response
       (extensions as any)?.response?.statusCode ||
-      500
-    );
+      // Fallback para 500 se nenhum status for encontrado
+      500;
+
+    // this.logger.debug(`Extracted status: ${status}`, JSON.stringify(extensions));
+
+    return status;
   }
 }

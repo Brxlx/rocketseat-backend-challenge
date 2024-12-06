@@ -12,6 +12,8 @@ import { CreateChallengeInput } from '../inputs/create-challenge.input';
 import { EditChallengeUseCase } from '@/domain/application/use-cases/Challenge/edit-challenge-use-case';
 import { EditChallengeInput } from '../inputs/edit-challenge.input';
 import { EditChallengeResponse } from '../responses/edit-challenge.response';
+import { TitleAlreadyExistsError } from '@/domain/application/use-cases/errors/title-already-exists.error';
+import { TitleAlreadyExistsGraphQLError } from '../../../errors/title-already-exists-gql.error';
 
 @Resolver(() => Challenge)
 export class ChallengeResolver {
@@ -42,9 +44,13 @@ export class ChallengeResolver {
   public async createChallenge(
     @Args('createChallengeInput') createChallengeInput: CreateChallengeInput,
   ) {
-    const { challenge } = await this.createChallengeUseCase.execute(createChallengeInput);
+    try {
+      const { challenge } = await this.createChallengeUseCase.execute(createChallengeInput);
 
-    return challenge.id.toString();
+      return challenge.id.toString();
+    } catch (err: any) {
+      this.handleResolverError(err);
+    }
   }
 
   @Mutation(() => EditChallengeResponse)
@@ -61,5 +67,11 @@ export class ChallengeResolver {
   @Mutation(() => Boolean, { nullable: true })
   public async deleteChallenge(@Args('id') id: string) {
     return this.deleteChallengeUseCase.execute(id);
+  }
+
+  private handleResolverError(err: any) {
+    if (err instanceof TitleAlreadyExistsError) {
+      throw new TitleAlreadyExistsGraphQLError();
+    }
   }
 }

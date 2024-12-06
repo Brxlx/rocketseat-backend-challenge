@@ -20,7 +20,7 @@ export class KafkaMessagingProducer implements Producer, OnModuleInit {
 
   async onModuleInit() {
     this.kafkaClient.subscribeToResponseOf('challenge.correction');
-    await this.kafkaClient.connect();
+    // await this.kafkaClient.connect();
   }
 
   async produce(topic: string, message: Answer): Promise<Answer | undefined> {

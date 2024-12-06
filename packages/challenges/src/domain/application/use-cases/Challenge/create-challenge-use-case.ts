@@ -1,6 +1,7 @@
 import { Challenge } from '@/domain/enterprise/entities/Challenge';
 import { ChallengesRepository } from '../../repositories/challenges.repository';
 import { Injectable } from '@nestjs/common';
+import { TitleAlreadyExistsError } from '../errors/title-already-exists.error';
 
 interface CreateChallengeUseCaseRequest {
   title: string;
@@ -19,7 +20,7 @@ export class CreateChallengeUseCase {
   }: CreateChallengeUseCaseRequest): Promise<CreateChallengeUseCaseResponse> {
     const titleAlreadyExists = await this.challengesRepository.findByTitle(title);
 
-    if (titleAlreadyExists) throw new Error('Title already exists');
+    if (titleAlreadyExists) throw new TitleAlreadyExistsError();
 
     const challenge = Challenge.create({ title, description });
     const newChallenge = await this.challengesRepository.create(challenge);
