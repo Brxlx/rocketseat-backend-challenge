@@ -6,8 +6,9 @@ import { ListChallengesUseCase } from '@/domain/application/use-cases/Challenge/
 import { ListChallengesResponse } from '../responses/list-challenges.response';
 import { ChallengePresenter } from '../presenters/challenge.presenter';
 import { ListChallengesFiltersInput } from '../inputs/list-challenges-filters.input';
-import { InternalServerErrorGraphQLError } from '../../../errors/internal-server-error-gql.error';
-import { InternalServerError } from '@/domain/application/use-cases/errors/internal-server.error';
+import { ResolverErrorHandler } from '../../../errors/resolver-error-handler';
+import { InputValidator } from '../../../input-validator';
+import { ListChallengesInputSchema } from '../inputs/challenge-input-validation';
 
 @Resolver(() => Challenge)
 export class ListChallengesResolver {
@@ -19,6 +20,10 @@ export class ListChallengesResolver {
     { titleOrDescription, page, itemsPerPage }: ListChallengesFiltersInput,
   ): Promise<any> {
     try {
+      InputValidator.validate(
+        { titleOrDescription, itemsPerPage, page },
+        ListChallengesInputSchema,
+      );
       const { challenges, ...rest } = await this.listChallengesUseCase.execute({
         titleOrDescription,
         params: {
@@ -29,13 +34,7 @@ export class ListChallengesResolver {
 
       return { ...rest, challenges: challenges.map(ChallengePresenter.toHTTP) };
     } catch (err: any) {
-      this.handleResolverError(err);
-    }
-  }
-
-  private handleResolverError(err: any) {
-    if (err instanceof InternalServerError) {
-      throw new InternalServerErrorGraphQLError();
+      return ResolverErrorHandler.handle(err);
     }
   }
 }

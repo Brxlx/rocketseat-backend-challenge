@@ -4,12 +4,9 @@ import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { Challenge } from '../models/Challenge';
 
 import { CreateChallengeInput } from '../inputs/create-challenge.input';
-import { TitleAlreadyExistsError } from '@/domain/application/use-cases/errors/title-already-exists.error';
-import { TitleAlreadyExistsGraphQLError } from '../../../errors/title-already-exists-gql.error';
-import { ChallengeNotFoundError } from '@/domain/application/use-cases/errors/challenge-not-found.error';
-import { ChallengeNotFoundGraphQLError } from '../../../errors/challenge-not-found-gql.error';
-import { InvalidChallengeIdError } from '@/domain/application/use-cases/errors/invalid-challenge-id.error';
-import { InvalidChallengeIdGraphQLError } from '../../../errors/invalid-challenge-id-gql.error';
+import { CreateChallengeInputSchema } from '../inputs/challenge-input-validation';
+import { InputValidator } from '../../../input-validator';
+import { ResolverErrorHandler } from '../../../errors/resolver-error-handler';
 
 @Resolver(() => Challenge)
 export class CreateChallengeResolver {
@@ -20,25 +17,13 @@ export class CreateChallengeResolver {
     @Args('createChallengeInput') createChallengeInput: CreateChallengeInput,
   ) {
     try {
+      InputValidator.validate(createChallengeInput, CreateChallengeInputSchema);
+
       const { challenge } = await this.createChallengeUseCase.execute(createChallengeInput);
 
       return challenge.id.toString();
     } catch (err: any) {
-      this.handleResolverError(err);
-    }
-  }
-
-  private handleResolverError(err: any) {
-    if (err instanceof TitleAlreadyExistsError) {
-      throw new TitleAlreadyExistsGraphQLError();
-    }
-
-    if (err instanceof ChallengeNotFoundError) {
-      throw new ChallengeNotFoundGraphQLError();
-    }
-
-    if (err instanceof InvalidChallengeIdError) {
-      throw new InvalidChallengeIdGraphQLError();
+      return ResolverErrorHandler.handle(err.message);
     }
   }
 }

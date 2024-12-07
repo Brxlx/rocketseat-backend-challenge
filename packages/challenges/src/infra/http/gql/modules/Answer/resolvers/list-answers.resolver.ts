@@ -7,10 +7,9 @@ import { ListAnswersResponse } from '../rersponses/list-answers.response';
 import { ANSWER_STATUS } from '@/core/consts';
 import { ChallengeNotFoundError } from '@/domain/application/use-cases/errors/challenge-not-found.error';
 import { ChallengeNotFoundGraphQLError } from '../../../errors/challenge-not-found-gql.error';
-import { EmptyGithubUrlError } from '@/domain/application/use-cases/errors/empty-github-url.error';
-import { EmptyGithubUrlGraphQLError } from '../../../errors/empty-github-url-gql.error';
-import { InvalidGithubUrlError } from '@/domain/application/use-cases/errors/invalid-github-url.error';
-import { InvalidGithubUrlGraphQLError } from '../../../errors/invalid-github-url-gql.error';
+import { ResolverErrorHandler } from '../../../errors/resolver-error-handler';
+import { InputValidator } from '../../../input-validator';
+import { ListAnswersInputSchema } from '../inputs/answer-input-validation';
 
 @Resolver(() => Answer)
 export class ListAnswersResolver {
@@ -19,6 +18,8 @@ export class ListAnswersResolver {
   @Query(() => ListAnswersResponse)
   public async listAnswers(@Args('listAnswesInput') listAnswersInput: ListAnswersInput) {
     try {
+      InputValidator.validate(listAnswersInput, ListAnswersInputSchema);
+
       const { answers, ...rest } = await this.fetchAnswersUseCase.execute({
         filters: {
           ...listAnswersInput.filters,
@@ -29,21 +30,12 @@ export class ListAnswersResolver {
 
       return { ...rest, answers: answers.map(AnswerPresenter.toHTTP) };
     } catch (err: any) {
-      this.handleResolverError(err);
-    }
-  }
-
-  private handleResolverError(err: any) {
-    if (err instanceof ChallengeNotFoundError) {
-      throw new ChallengeNotFoundGraphQLError();
-    }
-
-    if (err instanceof EmptyGithubUrlError) {
-      throw new EmptyGithubUrlGraphQLError();
-    }
-
-    if (err instanceof InvalidGithubUrlError) {
-      throw new InvalidGithubUrlGraphQLError();
+      return ResolverErrorHandler.handle(err, [
+        {
+          errorClass: ChallengeNotFoundError,
+          graphqlError: ChallengeNotFoundGraphQLError,
+        },
+      ]);
     }
   }
 }

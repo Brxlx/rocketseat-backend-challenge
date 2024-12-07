@@ -9,6 +9,9 @@ import { EmptyGithubUrlError } from '@/domain/application/use-cases/errors/empty
 import { EmptyGithubUrlGraphQLError } from '../../../errors/empty-github-url-gql.error';
 import { InvalidGithubUrlError } from '@/domain/application/use-cases/errors/invalid-github-url.error';
 import { InvalidGithubUrlGraphQLError } from '../../../errors/invalid-github-url-gql.error';
+import { InputValidator } from '../../../input-validator';
+import { submitAnswerSchema } from '../inputs/answer-input-validation';
+import { ResolverErrorHandler } from '../../../errors/resolver-error-handler';
 
 @Resolver(() => Answer)
 export class SubmitAnswerResolver {
@@ -17,25 +20,26 @@ export class SubmitAnswerResolver {
   @Mutation(() => Answer)
   public async submitAnswer(@Args('submitAnswerInput') submitAnswerInput: SubmitAnswerInput) {
     try {
+      InputValidator.validate(submitAnswerInput, submitAnswerSchema);
+
       const { answer } = await this.submitAnswerUseCase.execute(submitAnswerInput);
 
       return AnswerPresenter.toHTTP(answer);
     } catch (err: any) {
-      this.handleResolverError(err);
-    }
-  }
-
-  private handleResolverError(err: any) {
-    if (err instanceof ChallengeNotFoundError) {
-      throw new ChallengeNotFoundGraphQLError();
-    }
-
-    if (err instanceof EmptyGithubUrlError) {
-      throw new EmptyGithubUrlGraphQLError();
-    }
-
-    if (err instanceof InvalidGithubUrlError) {
-      throw new InvalidGithubUrlGraphQLError();
+      return ResolverErrorHandler.handle(err, [
+        {
+          errorClass: ChallengeNotFoundError,
+          graphqlError: ChallengeNotFoundGraphQLError,
+        },
+        {
+          errorClass: EmptyGithubUrlError,
+          graphqlError: EmptyGithubUrlGraphQLError,
+        },
+        {
+          errorClass: InvalidGithubUrlError,
+          graphqlError: InvalidGithubUrlGraphQLError,
+        },
+      ]);
     }
   }
 }
