@@ -6,16 +6,23 @@ import { makeAnswer } from 'test/factories/make-answer.factory';
 import { makeChallenge } from 'test/factories/make-challenge.factory';
 import { InMemoryAnswersRepository } from 'test/repositories/in-memory-answers.repository';
 import { ANSWER_STATUS } from '@/core/consts';
+import { FakeMessaging } from 'test/Messaging/fake-messaging';
 
 let inMemoryAnswersRepository: InMemoryAnswersRepository;
 let inMemoryChallengesRepository: InMemoryChallengesRepository;
+let fakeMessaging: FakeMessaging;
 let sut: SubmitAnswerUseCase; // system under test
 suite('[Answer]', () => {
   describe('Submit Answer', () => {
     beforeEach(() => {
       inMemoryAnswersRepository = new InMemoryAnswersRepository();
       inMemoryChallengesRepository = new InMemoryChallengesRepository();
-      sut = new SubmitAnswerUseCase(inMemoryAnswersRepository, inMemoryChallengesRepository);
+      fakeMessaging = new FakeMessaging();
+      sut = new SubmitAnswerUseCase(
+        inMemoryAnswersRepository,
+        inMemoryChallengesRepository,
+        fakeMessaging,
+      );
     });
     it('should be able to create a new answer submission', async () => {
       const newChallenge = await makeChallenge(
