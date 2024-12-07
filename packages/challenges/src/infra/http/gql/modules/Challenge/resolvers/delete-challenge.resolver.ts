@@ -1,0 +1,27 @@
+import { Args, Mutation, Resolver } from '@nestjs/graphql';
+
+import { Challenge } from '../models/Challenge';
+
+import { DeleteChallengeUseCase } from '@/domain/application/use-cases/Challenge/delete-challenge-use-case';
+import { InvalidChallengeIdError } from '@/domain/application/use-cases/errors/invalid-challenge-id.error';
+import { InvalidChallengeIdGraphQLError } from '../../../errors/invalid-challenge-id-gql.error';
+
+@Resolver(() => Challenge)
+export class DeleteChallengeResolver {
+  constructor(private deleteChallengeUseCase: DeleteChallengeUseCase) {}
+
+  @Mutation(() => Boolean, { nullable: true })
+  public async deleteChallenge(@Args('id') id: string) {
+    try {
+      return await this.deleteChallengeUseCase.execute(id);
+    } catch (err: any) {
+      this.handleResolverError(err);
+    }
+  }
+
+  private handleResolverError(err: any) {
+    if (err instanceof InvalidChallengeIdError) {
+      throw new InvalidChallengeIdGraphQLError();
+    }
+  }
+}

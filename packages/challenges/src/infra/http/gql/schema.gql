@@ -15,17 +15,6 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
-type ListChallengesResponse {
-  challenges: [Challenge!]!
-  total: Int!
-  page: Int!
-  itemsPerPage: Int!
-}
-
-type EditChallengeResponse {
-  challenge: Challenge!
-}
-
 """Answer model"""
 type Answer {
   id: ID!
@@ -45,6 +34,17 @@ enum ANSWER_STATUS {
 
 type ListAnswersResponse {
   answers: [Answer!]!
+  total: Int!
+  page: Int!
+  itemsPerPage: Int!
+}
+
+type EditChallengeResponse {
+  challenge: Challenge!
+}
+
+type ListChallengesResponse {
+  challenges: [Challenge!]!
   total: Int!
   page: Int!
   itemsPerPage: Int!

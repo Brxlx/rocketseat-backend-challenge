@@ -8,9 +8,13 @@ import { ChallengeModule } from './modules/Challenge/challenge.module';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { GraphQLFormatErrorFilter } from '@/infra/filters/GqlFormatError.filter';
 import { UUIDResolver } from './modules/Challenge/resolvers/uuid-scalar.resolver';
-import { ChallengeResolver } from './modules/Challenge/resolvers/challenge.resolver';
-import { AnswerResolver } from './modules/Answer/resolvers/answer.resolver';
+import { CreateChallengeResolver } from './modules/Challenge/resolvers/create-challenge.resolver';
+import { SubmitAnswerResolver } from './modules/Answer/resolvers/submit-answer.resolver';
 import { AnswerModule } from './modules/Answer/answer.module';
+import { ListAnswersResolver } from './modules/Answer/resolvers/list-answers.resolver';
+import { EditChallengeResolver } from './modules/Challenge/resolvers/edit-challenge.resolver';
+import { DeleteChallengeResolver } from './modules/Challenge/resolvers/delete-challenge.resolver';
+import { ListChallengesResolver } from './modules/Challenge/resolvers/list-challenges.resolver';
 
 @Module({
   imports: [
@@ -30,7 +34,23 @@ import { AnswerModule } from './modules/Answer/answer.module';
     ChallengeModule,
     AnswerModule,
   ],
-  providers: [UUIDResolver, ChallengeResolver, AnswerResolver],
-  exports: [UUIDResolver, ChallengeResolver, AnswerResolver],
+  providers: [
+    UUIDResolver,
+    CreateChallengeResolver,
+    EditChallengeResolver,
+    DeleteChallengeResolver,
+    SubmitAnswerResolver,
+    ListChallengesResolver,
+    ListAnswersResolver,
+  ],
+  exports: [
+    UUIDResolver,
+    CreateChallengeResolver,
+    EditChallengeResolver,
+    DeleteChallengeResolver,
+    SubmitAnswerResolver,
+    ListChallengesResolver,
+    ListAnswersResolver,
+  ],
 })
 export class GqlModule {}
