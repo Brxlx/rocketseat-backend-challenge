@@ -5,6 +5,7 @@ import { ClientKafka } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import { PrismaService } from '../database/prisma/prisma.service';
 import { ANSWER_STATUS } from '@/core/consts';
+import { SendingToTopicError } from '@/domain/application/use-cases/errors/sending-to-topic.error';
 
 interface CorrectLessonResponse {
   grade: number;
@@ -23,7 +24,7 @@ export class KafkaMessagingProducer implements Producer, OnModuleInit {
     // await this.kafkaClient.connect();
   }
 
-  async produce(topic: string, message: Answer): Promise<Answer | undefined> {
+  async produce(topic: string, message: Answer) {
     try {
       const messageToSend = {
         value: {
@@ -32,20 +33,29 @@ export class KafkaMessagingProducer implements Producer, OnModuleInit {
         },
       };
       console.log('Sending message topic', messageToSend);
+      throw new Error('******');
+      return message;
       const { grade, status }: CorrectLessonResponse = await lastValueFrom(
         this.kafkaClient.send(topic, {
           value: messageToSend,
         }),
       );
 
-      console.log('Response values*******************', grade, this.tranformStatus(status));
       await this.updateAnswerOnDB(message.id.toString(), grade, this.tranformStatus(status));
       message.grade = grade;
       message.status = this.tranformStatus(status)!;
 
       return message;
-    } catch (err) {
+    } catch (err: any) {
       console.log(`Error prodcucing message at topic ${topic}`, err);
+      await this.prisma.answer.update({
+        where: {
+          id: message.id.toString(),
+        },
+        data: {
+          status: ANSWER_STATUS.ERROR,
+        },
+      });
     }
   }
 

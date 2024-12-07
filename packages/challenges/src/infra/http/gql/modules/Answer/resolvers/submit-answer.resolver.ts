@@ -12,6 +12,8 @@ import { InvalidGithubUrlGraphQLError } from '../../../errors/invalid-github-url
 import { InputValidator } from '../../../input-validator';
 import { submitAnswerSchema } from '../inputs/answer-input-validation';
 import { ResolverErrorHandler } from '../../../errors/resolver-error-handler';
+import { SendingToTopicError } from '@/domain/application/use-cases/errors/sending-to-topic.error';
+import { SendingToTopicGraphQLError } from '../../../errors/sending-to-topic-gql.error';
 
 @Resolver(() => Answer)
 export class SubmitAnswerResolver {
@@ -38,6 +40,10 @@ export class SubmitAnswerResolver {
         {
           errorClass: InvalidGithubUrlError,
           graphqlError: InvalidGithubUrlGraphQLError,
+        },
+        {
+          errorClass: SendingToTopicError,
+          graphqlError: SendingToTopicGraphQLError,
         },
       ]);
     }

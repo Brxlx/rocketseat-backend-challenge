@@ -1,9 +1,3 @@
-/*
- * In Nodejs >= v20.12.0
- *import { loadEnvFile } from 'node:process';
- *
- *loadEnvFile('./.env');
- */
 import { execSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 
@@ -14,8 +8,6 @@ import { envSchema } from '@/infra/env/env.schema';
 
 config({ path: '.env', override: true });
 config({ path: '.env.test', override: true });
-
-// loadEnvFile('.env.test');
 
 const env = envSchema.parse(process.env);
 
@@ -43,9 +35,13 @@ const schemaId = randomUUID();
 beforeAll(async () => {
   const databaseURL = generateUniqueDatabaseURL(schemaId);
 
+  console.log(`DATABASE_URL: ${databaseURL}`);
+
   process.env.DATABASE_URL = databaseURL;
 
-  execSync('pnpm prisma migrate deploy');
+  execSync('pnpm prisma migrate deploy', {
+    stdio: 'inherit',
+  });
 });
 
 afterAll(async () => {

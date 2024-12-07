@@ -8,6 +8,7 @@ import { Producer } from '../../gateways/Messaging/producer';
 import { ChallengeNotFoundError } from '../errors/challenge-not-found.error';
 import { EmptyGithubUrlError } from '../errors/empty-github-url.error';
 import { InvalidGithubUrlError } from '../errors/invalid-github-url.error';
+import { SendingToTopicError } from '../errors/sending-to-topic.error';
 
 interface SubmitAnswerUseCaseRequest {
   challengeId: string;
@@ -45,7 +46,9 @@ export class SubmitAnswerUseCase {
 
     const answer = await this.answersRepository.create(newAnswer);
 
-    await this.producer.produce('challenge.correction', answer);
+    const response = await this.producer.produce('challenge.correction', answer);
+
+    if (!response) throw new SendingToTopicError();
 
     // await this.producer.(updatedAnswer);
 
