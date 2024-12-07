@@ -7,7 +7,7 @@ import { InvalidChallengeIdError } from '@/domain/application/use-cases/errors/i
 import { InvalidChallengeIdGraphQLError } from '../../../errors/invalid-challenge-id-gql.error';
 import { InputValidator } from '../../../input-validator';
 import { deleteChallengeInputSchema } from '../inputs/challenge-input-validation';
-import { ZodValidationError } from '../../../errors/zod-validation.error';
+import { ResolverErrorHandler } from '../../../errors/resolver-error-handler';
 
 @Resolver(() => Challenge)
 export class DeleteChallengeResolver {
@@ -19,17 +19,12 @@ export class DeleteChallengeResolver {
       InputValidator.validate({ id }, deleteChallengeInputSchema);
       return await this.deleteChallengeUseCase.execute(id);
     } catch (err: any) {
-      this.handleResolverError(err);
-    }
-  }
-
-  private handleResolverError(err: any) {
-    if (err instanceof ZodValidationError) {
-      throw new ZodValidationError(err.message);
-    }
-
-    if (err instanceof InvalidChallengeIdError) {
-      throw new InvalidChallengeIdGraphQLError();
+      return ResolverErrorHandler.handle(err, [
+        {
+          errorClass: InvalidChallengeIdError,
+          graphqlError: InvalidChallengeIdGraphQLError,
+        },
+      ]);
     }
   }
 }
