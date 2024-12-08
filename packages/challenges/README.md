@@ -1,99 +1,83 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Desafio Backend Rocketseat
+---
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+### 🚀 Visão Geral do Projeto
+Esta aplicação backend é uma solução robusta e escalável com o objetivo de resolver o desafio proposto usando `Node.js`, `Typescript` e as melhores práticas de código e arquitetura.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+### 🔑 Recursos Principais
 
-## Description
+- Versão do Node.js: Utiliza Node.js `v22.12.0` (LTS atual).
+- Arquitetura: Implementa princípios de **Arquitetura Limpa**.
+- Padrões de Código: Adere aos princípios de design `DRY`, `YAGNI` e `SOLID`.
+- Gerenciamento de Pacotes: Desenvolvido com pnpm.
+- Mensageria: Sistema de mensageria Kafka(pacote `kafkajs` integrado com o pacote `@nestjs/microservices`).
+- Validação: Validação avançada de entrada usando Zod.
+- Conteinerização: Docker com Dockerfile e docker-compose.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+### 📦 Pré-requisitos
 
-## Project setup
+- Node.js `v22.12.0` (LTS no momento da criação)
+- pnpm
+- Docker
+- Docker Compose
+
+### 🛠 Configuração e Instalação
+#### 1. Clonar o Repositório
+```bash
+git clone https://github.com/Brxlx/rocketseat-backend-challenge.git
+
+# Entrar no diretório do projeto de challenges
+cd rocketseat-backend-challenge/challenges
+
+# Entrar no diretório do projeto de correções
+cd rocketseat-backend-challenge/corrections
+```
+#### 2. Instalar Dependências
+```bash
+# Instalar dependências em ambos os diretórios
+pnpm install
+```
+#### 3. Configuração do Kafka
+Iniciar Serviços de Infraestrutura(diretório raiz)
 
 ```bash
-$ pnpm install
+docker-compose up -d
 ```
+**⚠️ Nota Importante: Haverá uma latência normal ao iniciar os serviços do Kafka durante o rebalanceamento do cluster. Este é um comportamento esperado durante a configuração inicial.**
 
-## Compile and run the project
-
+#### 4. Executar a Aplicação
 ```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+pnpm start:dev
 ```
 
-## Run tests
+#### 🌐 Acessando a Aplicação
 
+Playground GraphQL: http://localhost:3000/gql
+
+- Explore funções disponíveis
+- Acesse documentação abrangente
+- Teste interativo de consultas
+
+#### 🐳 Implantação Docker
+Um Dockerfile é fornecido na raiz do projeto para implantação conteinerizada:
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+docker build -t backend-challenge .
+docker run -p 3000:3000 backend-challenge
 ```
 
-## Deployment
+#### 🔒 Segurança e Gerenciamento de Dependências
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+Os pacotes e bibliotecas do pacote de _corrections_ forma atualizados para versões mais recentes, seguindo as versões do pacote de _challenges_ para manter compatibilidade e segurança.
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+#### 🔗 Link para avaliação da solução do desafio
 
-```bash
-$ pnpm install -g mau
-$ mau deploy
-```
+Repositório GitHub: [Desafio Backend Rocketseat](https://github.com/Brxlx/rocketseat-backend-challenge)
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
 
-## Resources
+#### 📝 Práticas de Desenvolvimento
 
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- Implementação de Arquitetura Limpa
+- Design modular e extensível
+- Validação dos dados de entrada
+- Tratamento de erros de resolvers e _use cases_
+- Validação de esquema

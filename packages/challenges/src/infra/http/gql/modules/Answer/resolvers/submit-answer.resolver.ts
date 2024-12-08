@@ -14,6 +14,8 @@ import { submitAnswerSchema } from '../inputs/answer-input-validation';
 import { ResolverErrorHandler } from '../../../errors/resolver-error-handler';
 import { SendingToTopicError } from '@/domain/application/use-cases/errors/sending-to-topic.error';
 import { SendingToTopicGraphQLError } from '../../../errors/sending-to-topic-gql.error';
+import { RepositoryAlreadyExistsError } from '@/domain/application/use-cases/errors/repository-already-exists';
+import { RepositoryAlreadyExistsGraphQLError } from '../../../errors/repository-already-exists-gql.error';
 
 @Resolver(() => Answer)
 export class SubmitAnswerResolver {
@@ -40,6 +42,10 @@ export class SubmitAnswerResolver {
         {
           errorClass: InvalidGithubUrlError,
           graphqlError: InvalidGithubUrlGraphQLError,
+        },
+        {
+          errorClass: RepositoryAlreadyExistsError,
+          graphqlError: RepositoryAlreadyExistsGraphQLError,
         },
         {
           errorClass: SendingToTopicError,

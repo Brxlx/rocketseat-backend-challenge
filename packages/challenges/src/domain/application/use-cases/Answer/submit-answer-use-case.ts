@@ -9,6 +9,7 @@ import { ChallengeNotFoundError } from '../errors/challenge-not-found.error';
 import { EmptyGithubUrlError } from '../errors/empty-github-url.error';
 import { InvalidGithubUrlError } from '../errors/invalid-github-url.error';
 import { SendingToTopicError } from '../errors/sending-to-topic.error';
+import { RepositoryAlreadyExistsError } from '../errors/repository-already-exists';
 
 interface SubmitAnswerUseCaseRequest {
   challengeId: string;
@@ -36,6 +37,10 @@ export class SubmitAnswerUseCase {
     await this.validateChallenge(challengeId);
 
     this.validateGitHubRepository(repositoryUrl);
+
+    const repositoryAlreadyExists = await this.answersRepository.findByRepositoryUrl(repositoryUrl);
+
+    if (repositoryAlreadyExists) throw new RepositoryAlreadyExistsError();
 
     const newAnswer = Answer.create({
       challengeId: new UniqueEntityID(challengeId),

@@ -23,6 +23,18 @@ export class PrismaAnswersRepository implements AnswersRepository {
     return PrismaAnswersMapper.toDomain(answer);
   }
 
+  async findByRepositoryUrl(repositoryUrl: string): Promise<Answer | null> {
+    const repositoryAlreadyExists = await this.prisma.answer.findUnique({
+      where: {
+        repositoryUrl,
+      },
+    });
+
+    if (!repositoryAlreadyExists) return null;
+
+    return PrismaAnswersMapper.toDomain(repositoryAlreadyExists);
+  }
+
   async findManyByFilters(
     filters: AnswerFilters,
     params: PaginationParams,

@@ -4,6 +4,7 @@ import { Answer } from '@/domain/enterprise/entities/Answer';
 
 export abstract class AnswersRepository {
   abstract findById(id: string): Promise<Answer | null>;
+  abstract findByRepositoryUrl(repositoryUrl: string): Promise<Answer | null>;
   abstract findManyByFilters(
     filters: AnswerFilters,
     params: PaginationParams,

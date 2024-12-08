@@ -5,7 +5,6 @@ import { ClientKafka } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import { PrismaService } from '../database/prisma/prisma.service';
 import { ANSWER_STATUS } from '@/core/consts';
-import { SendingToTopicError } from '@/domain/application/use-cases/errors/sending-to-topic.error';
 
 interface CorrectLessonResponse {
   grade: number;
@@ -33,8 +32,7 @@ export class KafkaMessagingProducer implements Producer, OnModuleInit {
         },
       };
       console.log('Sending message topic', messageToSend);
-      throw new Error('******');
-      return message;
+
       const { grade, status }: CorrectLessonResponse = await lastValueFrom(
         this.kafkaClient.send(topic, {
           value: messageToSend,
@@ -48,6 +46,8 @@ export class KafkaMessagingProducer implements Producer, OnModuleInit {
       return message;
     } catch (err: any) {
       console.log(`Error prodcucing message at topic ${topic}`, err);
+
+      // Update answer status to error and finalize the process
       await this.prisma.answer.update({
         where: {
           id: message.id.toString(),

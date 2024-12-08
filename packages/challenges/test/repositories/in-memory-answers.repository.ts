@@ -14,6 +14,13 @@ export class InMemoryAnswersRepository implements AnswersRepository {
     return answer;
   }
 
+  async findByRepositoryUrl(repositoryUrl: string): Promise<Answer | null> {
+    const answer = this.items.find((item) => item.repositoryUrl === repositoryUrl);
+    if (!answer) return null;
+
+    return answer;
+  }
+
   async findManyByFilters(
     filters: AnswerFilters,
     { page = 1, itemsPerPage = 10 }: PaginationParams,
