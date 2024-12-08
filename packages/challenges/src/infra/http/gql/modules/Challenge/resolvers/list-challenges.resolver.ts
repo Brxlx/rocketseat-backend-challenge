@@ -14,10 +14,10 @@ import { ValidateInput } from '@/infra/decorators/validate-input.decorator';
 export class ListChallengesResolver {
   constructor(private listChallengesUseCase: ListChallengesUseCase) {}
 
-  @Query(() => ListChallengesResponse)
+  @Query(() => ListChallengesResponse, { description: 'Lista desafios pelos filtros e paginação' })
   @ValidateInput(ListChallengesInputSchema)
   public async listChallenges(
-    @Args('listChallengesFiltersInput')
+    @Args('listChallengesFiltersInput', { description: 'Filtros e paginação' })
     { titleOrDescription, page, itemsPerPage }: ListChallengesFiltersInput,
   ): Promise<any> {
     try {

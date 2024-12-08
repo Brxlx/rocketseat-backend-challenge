@@ -10,11 +10,7 @@ import { Prisma } from '@prisma/client';
 export class PrismaChallengesRepository implements ChallengesRepository {
   constructor(private readonly prisma: PrismaService) {}
   async findById(id: string): Promise<Challenge | null> {
-    const challenge = await this.prisma.challenge.findUnique({
-      where: {
-        id,
-      },
-    });
+    const challenge = await this.prisma.challenge.findUnique({ where: { id } });
 
     if (!challenge) {
       return null;

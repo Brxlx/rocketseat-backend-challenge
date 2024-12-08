@@ -25,10 +25,15 @@ type Answer {
   createdAt: DateTime!
 }
 
-"""Available statuses for answer submissions"""
+"""Status possíveis para uma resposta"""
 enum ANSWER_STATUS {
+  """Pending"""
   PENDING
+
+  """Error"""
   ERROR
+
+  """Done"""
   DONE
 }
 
@@ -54,8 +59,19 @@ type ListChallengesResponse {
 scalar UUID
 
 type Query {
-  listChallenges(listChallengesFiltersInput: ListChallengesFiltersInput!): ListChallengesResponse!
-  listAnswers(listAnswesInput: ListAnswersInput!): ListAnswersResponse!
+  """Lista desafios pelos filtros e paginação"""
+  listChallenges(
+    """Filtros e paginação"""
+    listChallengesFiltersInput: ListChallengesFiltersInput!
+  ): ListChallengesResponse!
+
+  """
+  Lista as respostas de um desafio pelos parâmetros de filtros e paginação
+  """
+  listAnswers(
+    """Os filtros possíveis e argumentos de paginação"""
+    listAnswesInput: ListAnswersInput!
+  ): ListAnswersResponse!
 }
 
 input ListChallengesFiltersInput {
@@ -82,10 +98,29 @@ input ParamsInput {
 }
 
 type Mutation {
-  createChallenge(createChallengeInput: CreateChallengeInput!): String!
-  updateChallenge(editChallengeInput: EditChallengeInput!): EditChallengeResponse!
-  deleteChallenge(id: String!): Boolean
-  submitAnswer(submitAnswerInput: SubmitAnswerInput!): Answer!
+  """Cria um novo desafio"""
+  createChallenge(
+    """Dados necessaŕios para criar um novo desafio"""
+    createChallengeInput: CreateChallengeInput!
+  ): String!
+
+  """Atualiza um desafio existente"""
+  updateChallenge(
+    """Dados para atualização do desafio"""
+    editChallengeInput: EditChallengeInput!
+  ): EditChallengeResponse!
+
+  """Deleta um desafio pelo id"""
+  deleteChallenge(
+    """o id do desafio a ser deletado"""
+    deleteInput: DeleteChallengeInput!
+  ): Boolean
+
+  """Envia uma submissão de resposta para um desafio"""
+  submitAnswer(
+    """As entradas possíveis para submissão de resposta"""
+    submitAnswerInput: SubmitAnswerInput!
+  ): Answer!
 }
 
 input CreateChallengeInput {
@@ -97,6 +132,10 @@ input EditChallengeInput {
   id: ID!
   title: String
   description: String
+}
+
+input DeleteChallengeInput {
+  id: ID!
 }
 
 input SubmitAnswerInput {

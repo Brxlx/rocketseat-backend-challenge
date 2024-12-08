@@ -61,7 +61,6 @@ export class GraphQLFormatErrorFilter {
       timestamp: new Date().toISOString(),
       extensions: {
         code: extensions?.code || 'INTERNAL_SERVER_ERROR',
-        ...extensions,
       },
       name: this.extractName(formattedError, extensions),
       status: this.extractStatus(formattedError, extensions),

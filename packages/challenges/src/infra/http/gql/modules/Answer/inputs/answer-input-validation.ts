@@ -3,14 +3,7 @@ import { GQL_ANSWER_STATUS_ENUM } from '../resolvers/register-answer-enum';
 
 export const submitAnswerSchema = z.object({
   challengeId: z.string().uuid({ message: 'O challengeId deve ser um uuid válido' }),
-  repositoryUrl: z.string().refine(
-    (val) => {
-      const toRegex = /^https:\/\/github\.com\/[^\/]+\/[^\/]+$/;
-
-      return toRegex.test(val);
-    },
-    { message: 'O repositoryUrl deve ser uma URL válida do GitHub' },
-  ),
+  repositoryUrl: z.string().url({ message: 'O repositoryUrl deve ser uma URL válida' }),
 });
 
 const StatusEnumSchema = z.nativeEnum(GQL_ANSWER_STATUS_ENUM);

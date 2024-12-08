@@ -15,9 +15,14 @@ import { ValidateInput } from '@/infra/decorators/validate-input.decorator';
 export class ListAnswersResolver {
   constructor(private fetchAnswersUseCase: FetchAnswersUseCase) {}
 
-  @Query(() => ListAnswersResponse)
+  @Query(() => ListAnswersResponse, {
+    description: 'Lista as respostas de um desafio pelos parâmetros de filtros e paginação',
+  })
   @ValidateInput(ListAnswersInputSchema)
-  public async listAnswers(@Args('listAnswesInput') listAnswersInput: ListAnswersInput) {
+  public async listAnswers(
+    @Args('listAnswesInput', { description: 'Os filtros possíveis e argumentos de paginação' })
+    listAnswersInput: ListAnswersInput,
+  ) {
     try {
       const { answers, ...rest } = await this.fetchAnswersUseCase.execute({
         filters: {

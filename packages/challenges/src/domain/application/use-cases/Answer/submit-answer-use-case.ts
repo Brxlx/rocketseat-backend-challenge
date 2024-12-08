@@ -10,6 +10,7 @@ import { EmptyGithubUrlError } from '../errors/empty-github-url.error';
 import { InvalidGithubUrlError } from '../errors/invalid-github-url.error';
 import { SendingToTopicError } from '../errors/sending-to-topic.error';
 import { RepositoryAlreadyExistsError } from '../errors/repository-already-exists';
+import { Challenge } from '@/domain/enterprise/entities/Challenge';
 
 interface SubmitAnswerUseCaseRequest {
   challengeId: string;
@@ -34,9 +35,9 @@ export class SubmitAnswerUseCase {
     grade,
     status,
   }: SubmitAnswerUseCaseRequest): Promise<SubmitAnswerUseCaseResponse> {
-    await this.validateChallenge(challengeId);
+    await this.validateChallenge(challengeId, repositoryUrl);
 
-    this.validateGitHubRepository(repositoryUrl);
+    await this.validateGitHubRepository(challengeId, repositoryUrl);
 
     const repositoryAlreadyExists = await this.answersRepository.findByRepositoryUrl(repositoryUrl);
 
@@ -60,20 +61,49 @@ export class SubmitAnswerUseCase {
     return { answer };
   }
 
-  private async validateChallenge(challengeId: string): Promise<void> {
+  private async validateChallenge(challengeId: string, repositoryUrl: string): Promise<void> {
     const challenge = await this.challengesRepository.findById(challengeId);
     if (!challenge) {
+      await this.challengesRepository.create(
+        Challenge.create(
+          {
+            title: 'Desafio não encontrado',
+            description: `Desafio ${repositoryUrl} não encontrado`,
+          },
+          new UniqueEntityID(challengeId),
+        ),
+      );
+      await this.answersRepository.create(
+        Answer.create({
+          challengeId: new UniqueEntityID(challengeId),
+          repositoryUrl,
+          grade: null,
+          status: ANSWER_STATUS.ERROR,
+        }),
+      );
       throw new ChallengeNotFoundError();
     }
   }
 
-  private validateGitHubRepository(url: string): boolean {
-    // Lógica de validação do repositório GitHub
+  private async validateGitHubRepository(challengeId: string, url: string): Promise<boolean> {
     const githubRepoRegex = /^https:\/\/github\.com\/[^\/]+\/[^\/]+$/;
 
     if (!url) throw new EmptyGithubUrlError();
 
-    if (!githubRepoRegex.test(url)) throw new InvalidGithubUrlError();
+    if (!githubRepoRegex.test(url)) {
+      const repositoryAlreadyExists = await this.answersRepository.findByRepositoryUrl(url);
+      if (repositoryAlreadyExists) throw new RepositoryAlreadyExistsError();
+
+      await this.answersRepository.create(
+        Answer.create({
+          challengeId: new UniqueEntityID(challengeId),
+          repositoryUrl: url,
+          grade: null,
+          status: ANSWER_STATUS.ERROR,
+        }),
+      );
+      throw new InvalidGithubUrlError();
+    }
 
     return true;
   }

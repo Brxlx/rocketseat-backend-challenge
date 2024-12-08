@@ -12,10 +12,11 @@ import { ValidateInput } from '@/infra/decorators/validate-input.decorator';
 export class CreateChallengeResolver {
   constructor(private createChallengeUseCase: CreateChallengeUseCase) {}
 
-  @Mutation(() => String)
+  @Mutation(() => String, { description: 'Cria um novo desafio' })
   @ValidateInput(CreateChallengeInputSchema)
   public async createChallenge(
-    @Args('createChallengeInput') createChallengeInput: CreateChallengeInput,
+    @Args('createChallengeInput', { description: 'Dados necessaŕios para criar um novo desafio' })
+    createChallengeInput: CreateChallengeInput,
   ) {
     try {
       const { challenge } = await this.createChallengeUseCase.execute(createChallengeInput);

@@ -36,18 +36,24 @@ suite('[Challenge] (E2E)', () => {
         .post('/gql')
         .send({
           query: `
-            mutation DeleteChallenge($deleteChallengeId: String!) {
-              deleteChallenge(id: $deleteChallengeId)
-            }`,
+           mutation DeleteChallenge($deleteInput: DeleteChallengeInput!) {
+            deleteChallenge(deleteInput: $deleteInput)
+          }`,
           variables: {
-            deleteChallengeId: challenge.id.toString(),
+            deleteInput: {
+              id: challenge.id.toString(),
+            },
           },
         });
+
+      console.log(response.body);
 
       expect(response.statusCode).toBe(200);
       expect(response.body.data.deleteChallenge).toBeNull();
 
-      const challengeOnDB = await prisma.challenge.findFirst({ where: { title: challenge.title } });
+      const challengeOnDB = await prisma.challenge.findFirst({
+        where: { id: challenge.id.toString() },
+      });
 
       expect(challengeOnDB).toBeNull();
     });

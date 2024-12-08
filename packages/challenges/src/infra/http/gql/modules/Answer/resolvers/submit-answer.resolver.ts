@@ -22,9 +22,12 @@ import { ValidateInput } from '@/infra/decorators/validate-input.decorator';
 export class SubmitAnswerResolver {
   constructor(private submitAnswerUseCase: SubmitAnswerUseCase) {}
 
-  @Mutation(() => Answer)
+  @Mutation(() => Answer, { description: 'Envia uma submissão de resposta para um desafio' })
   @ValidateInput(submitAnswerSchema)
-  public async submitAnswer(@Args('submitAnswerInput') submitAnswerInput: SubmitAnswerInput) {
+  public async submitAnswer(
+    @Args('submitAnswerInput', { description: 'As entradas possíveis para submissão de resposta' })
+    submitAnswerInput: SubmitAnswerInput,
+  ) {
     try {
       const { answer } = await this.submitAnswerUseCase.execute(submitAnswerInput);
 

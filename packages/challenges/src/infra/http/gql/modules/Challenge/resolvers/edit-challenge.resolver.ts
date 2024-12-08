@@ -16,9 +16,12 @@ import { editChallengeSchema } from '../inputs/challenge-input-validation';
 export class EditChallengeResolver {
   constructor(private editChallengeUseCase: EditChallengeUseCase) {}
 
-  @Mutation(() => EditChallengeResponse)
+  @Mutation(() => EditChallengeResponse, { description: 'Atualiza um desafio existente' })
   @ValidateInput(editChallengeSchema)
-  public async updateChallenge(@Args('editChallengeInput') editChallengeInput: EditChallengeInput) {
+  public async updateChallenge(
+    @Args('editChallengeInput', { description: 'Dados para atualização do desafio' })
+    editChallengeInput: EditChallengeInput,
+  ) {
     try {
       const updatedChallenge = await this.editChallengeUseCase.execute({
         id: editChallengeInput.id,

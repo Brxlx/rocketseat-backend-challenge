@@ -9,5 +9,16 @@ export enum GQL_ANSWER_STATUS_ENUM {
 
 registerEnumType(GQL_ANSWER_STATUS_ENUM, {
   name: 'ANSWER_STATUS',
-  description: 'Available statuses for answer submissions',
+  description: 'Status possíveis para uma resposta',
+  valuesMap: {
+    [ANSWER_STATUS.PENDING]: {
+      description: 'Pending',
+    },
+    [ANSWER_STATUS.ERROR]: {
+      description: 'Error',
+    },
+    [ANSWER_STATUS.DONE]: {
+      description: 'Done',
+    },
+  },
 });
