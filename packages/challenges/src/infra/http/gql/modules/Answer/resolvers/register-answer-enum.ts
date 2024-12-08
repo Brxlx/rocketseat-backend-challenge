@@ -1,4 +1,4 @@
-import { ANSWER_STATUS } from '@/core/consts';
+import { ANSWER_STATUS } from '@/core/consts/answer-status';
 import { registerEnumType } from '@nestjs/graphql';
 
 export enum GQL_ANSWER_STATUS_ENUM {

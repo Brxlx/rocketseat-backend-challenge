@@ -5,7 +5,7 @@ import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 import { makeAnswer } from 'test/factories/make-answer.factory';
 import { makeChallenge } from 'test/factories/make-challenge.factory';
 import { InMemoryAnswersRepository } from 'test/repositories/in-memory-answers.repository';
-import { ANSWER_STATUS } from '@/core/consts';
+import { ANSWER_STATUS } from '@/core/consts/answer-status';
 import { FakeMessaging } from 'test/Messaging/fake-messaging';
 
 let inMemoryAnswersRepository: InMemoryAnswersRepository;

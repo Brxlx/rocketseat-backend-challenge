@@ -1,4 +1,4 @@
-import { ANSWER_STATUS } from '../consts';
+import { ANSWER_STATUS } from '../consts/answer-status';
 
 export interface AnswerFilters {
   challengeId?: string;

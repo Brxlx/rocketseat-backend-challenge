@@ -1,4 +1,4 @@
-import { ANSWER_STATUS } from '@/core/consts';
+import { ANSWER_STATUS } from '@/core/consts/answer-status';
 import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 import { Answer } from '@/domain/enterprise/entities/Answer';
 import { Prisma, Answer as PrismaAnswer, AnswerStatus as PrismaAnswerStatus } from '@prisma/client';

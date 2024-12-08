@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AnswersRepository } from '../../repositories/answers.repository';
 import { Answer } from '@/domain/enterprise/entities/Answer';
-import { ANSWER_STATUS } from '@/core/consts';
+import { ANSWER_STATUS } from '@/core/consts/answer-status';
 import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 import { ChallengesRepository } from '../../repositories/challenges.repository';
 import { Producer } from '../../gateways/Messaging/producer';

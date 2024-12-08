@@ -1,4 +1,4 @@
-import { ANSWER_STATUS } from '@/core/consts';
+import { ANSWER_STATUS } from '@/core/consts/answer-status';
 import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 import { Answer, AnswerProps } from '@/domain/enterprise/entities/Answer';
 import { PrismaAnswersMapper } from '@/infra/database/prisma/mappers/prisma-answers.mapper';

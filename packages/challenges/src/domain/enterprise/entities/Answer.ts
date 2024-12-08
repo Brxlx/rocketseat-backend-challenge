@@ -1,7 +1,7 @@
 import { Entity } from '@/core/entities/entity';
 import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 import { Optional } from '@/core/types/optional';
-import { ANSWER_STATUS } from '@/core/consts/index';
+import { ANSWER_STATUS } from '@/core/consts/answer-status';
 
 export interface AnswerProps {
   challengeId: UniqueEntityID;

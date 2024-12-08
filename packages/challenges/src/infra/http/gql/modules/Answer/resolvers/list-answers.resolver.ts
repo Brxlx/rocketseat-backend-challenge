@@ -4,7 +4,7 @@ import { ListAnswersInput } from '../inputs/list-answers.input';
 import { Answer } from '../models/Answer';
 import { AnswerPresenter } from '../presenters/answer.presenter';
 import { ListAnswersResponse } from '../rersponses/list-answers.response';
-import { ANSWER_STATUS } from '@/core/consts';
+import { ANSWER_STATUS } from '@/core/consts/answer-status';
 import { ChallengeNotFoundError } from '@/domain/application/use-cases/errors/challenge-not-found.error';
 import { ChallengeNotFoundGraphQLError } from '../../../errors/challenge-not-found-gql.error';
 import { ResolverErrorHandler } from '../../../errors/resolver-error-handler';
