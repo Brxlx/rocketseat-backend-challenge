@@ -1,8 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { GraphQLFormattedError } from 'graphql';
 
+interface ValidationErrorItem {
+  field: string;
+  message: string;
+  code: string;
+}
+
 interface GraphQLErrorExtensions {
   code?: string;
+  validationErrors?: ValidationErrorItem[];
+  stackTrace?: string;
   exception?: {
     name?: string;
     status?: number;
@@ -30,20 +38,34 @@ export class GraphQLFormatErrorFilter {
   public format(formattedError: GraphQLFormattedError): CustomGraphQLFormattedError {
     const extensions = formattedError.extensions as GraphQLErrorExtensions | undefined;
 
-    // Normalize message to a string
+    // Special handling for validation errors
+    if (extensions?.code === 'ZOD_VALIDATION_ERROR') {
+      return {
+        message: formattedError.message,
+        timestamp: new Date().toISOString(),
+        extensions: {
+          code: 'ZOD_VALIDATION_ERROR',
+          validationErrors: extensions.validationErrors,
+        },
+        name: 'Input Validation Error',
+        status: 400,
+      };
+    }
+
+    // Regular error handling
     const message = this.extractMessage(formattedError, extensions);
     const messageString = Array.isArray(message) ? message.join('; ') : message;
 
-    const processedError: CustomGraphQLFormattedError = {
+    return {
       message: messageString,
       timestamp: new Date().toISOString(),
+      extensions: {
+        code: extensions?.code || 'INTERNAL_SERVER_ERROR',
+        ...extensions,
+      },
       name: this.extractName(formattedError, extensions),
       status: this.extractStatus(formattedError, extensions),
     };
-
-    this.logger.error(JSON.stringify(processedError));
-
-    return processedError;
   }
 
   private extractMessage(

@@ -9,12 +9,15 @@ import { EditChallengeResponse } from '../responses/edit-challenge.response';
 import { TitleAlreadyExistsError } from '@/domain/application/use-cases/errors/title-already-exists.error';
 import { TitleAlreadyExistsGraphQLError } from '../../../errors/title-already-exists-gql.error';
 import { ResolverErrorHandler } from '../../../errors/resolver-error-handler';
+import { ValidateInput } from '@/infra/decorators/validate-input.decorator';
+import { editChallengeSchema } from '../inputs/challenge-input-validation';
 
 @Resolver(() => Challenge)
 export class EditChallengeResolver {
   constructor(private editChallengeUseCase: EditChallengeUseCase) {}
 
   @Mutation(() => EditChallengeResponse)
+  @ValidateInput(editChallengeSchema)
   public async updateChallenge(@Args('editChallengeInput') editChallengeInput: EditChallengeInput) {
     try {
       const updatedChallenge = await this.editChallengeUseCase.execute({

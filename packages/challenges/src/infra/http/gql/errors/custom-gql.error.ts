@@ -9,9 +9,14 @@ export abstract class CustomGraphQLError extends GraphQLError {
   ) {
     super(message, {
       extensions: {
-        ...extensions,
+        ...(extensions || {}),
         status: statusCode,
       },
+    });
+    // Ensure stack trace is not exposed
+    Object.defineProperty(this, 'stackTrace', {
+      enumerable: false,
+      value: undefined,
     });
   }
 }

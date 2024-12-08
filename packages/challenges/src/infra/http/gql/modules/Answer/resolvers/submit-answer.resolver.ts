@@ -9,22 +9,24 @@ import { EmptyGithubUrlError } from '@/domain/application/use-cases/errors/empty
 import { EmptyGithubUrlGraphQLError } from '../../../errors/empty-github-url-gql.error';
 import { InvalidGithubUrlError } from '@/domain/application/use-cases/errors/invalid-github-url.error';
 import { InvalidGithubUrlGraphQLError } from '../../../errors/invalid-github-url-gql.error';
-import { InputValidator } from '../../../input-validator';
+// import { InputValidator } from '../../../input-validator';
 import { submitAnswerSchema } from '../inputs/answer-input-validation';
 import { ResolverErrorHandler } from '../../../errors/resolver-error-handler';
 import { SendingToTopicError } from '@/domain/application/use-cases/errors/sending-to-topic.error';
 import { SendingToTopicGraphQLError } from '../../../errors/sending-to-topic-gql.error';
 import { RepositoryAlreadyExistsError } from '@/domain/application/use-cases/errors/repository-already-exists';
 import { RepositoryAlreadyExistsGraphQLError } from '../../../errors/repository-already-exists-gql.error';
+import { ValidateInput } from '@/infra/decorators/validate-input.decorator';
 
 @Resolver(() => Answer)
 export class SubmitAnswerResolver {
   constructor(private submitAnswerUseCase: SubmitAnswerUseCase) {}
 
   @Mutation(() => Answer)
+  @ValidateInput(submitAnswerSchema)
   public async submitAnswer(@Args('submitAnswerInput') submitAnswerInput: SubmitAnswerInput) {
     try {
-      InputValidator.validate(submitAnswerInput, submitAnswerSchema);
+      // InputValidator.validate(submitAnswerInput, submitAnswerSchema);
 
       const { answer } = await this.submitAnswerUseCase.execute(submitAnswerInput);
 

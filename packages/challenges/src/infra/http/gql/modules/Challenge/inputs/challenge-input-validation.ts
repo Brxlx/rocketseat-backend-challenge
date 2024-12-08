@@ -18,6 +18,20 @@ export const CreateChallengeInputSchema = z.object({
     }),
 });
 
+export const editChallengeSchema = z.object({
+  id: z.string().uuid({ message: 'O id do desafio deve ser um UUID válido' }),
+  title: z
+    .string()
+    .min(3, { message: 'O título deve ter no mínimo 3 caracteres' })
+    .trim()
+    .optional(),
+  description: z
+    .string()
+    .min(3, { message: 'A descrição deve ter no mínimo 3 caracteres' })
+    .trim()
+    .optional(),
+});
+
 export const deleteChallengeInputSchema = z.object({
   id: z.string().uuid({ message: 'O id do desafio deve ser um UUID válido' }),
 });
