@@ -8,18 +8,17 @@ import { ANSWER_STATUS } from '@/core/consts/answer-status';
 import { ChallengeNotFoundError } from '@/domain/application/use-cases/errors/challenge-not-found.error';
 import { ChallengeNotFoundGraphQLError } from '../../../errors/challenge-not-found-gql.error';
 import { ResolverErrorHandler } from '../../../errors/resolver-error-handler';
-import { InputValidator } from '../../../input-validator';
 import { ListAnswersInputSchema } from '../inputs/answer-input-validation';
+import { ValidateInput } from '@/infra/decorators/validate-input.decorator';
 
 @Resolver(() => Answer)
 export class ListAnswersResolver {
   constructor(private fetchAnswersUseCase: FetchAnswersUseCase) {}
 
   @Query(() => ListAnswersResponse)
+  @ValidateInput(ListAnswersInputSchema)
   public async listAnswers(@Args('listAnswesInput') listAnswersInput: ListAnswersInput) {
     try {
-      InputValidator.validate(listAnswersInput, ListAnswersInputSchema);
-
       const { answers, ...rest } = await this.fetchAnswersUseCase.execute({
         filters: {
           ...listAnswersInput.filters,

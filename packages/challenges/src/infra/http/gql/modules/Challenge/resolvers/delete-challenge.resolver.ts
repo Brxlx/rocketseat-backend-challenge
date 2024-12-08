@@ -17,7 +17,6 @@ export class DeleteChallengeResolver {
   @ValidateInput(deleteChallengeInputSchema)
   public async deleteChallenge(@Args('id') id: string) {
     try {
-      // InputValidator.validate({ id }, deleteChallengeInputSchema);
       return await this.deleteChallengeUseCase.execute(id);
     } catch (err: any) {
       return ResolverErrorHandler.handle(err, [

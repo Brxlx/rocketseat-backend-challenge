@@ -26,8 +26,6 @@ export class SubmitAnswerResolver {
   @ValidateInput(submitAnswerSchema)
   public async submitAnswer(@Args('submitAnswerInput') submitAnswerInput: SubmitAnswerInput) {
     try {
-      // InputValidator.validate(submitAnswerInput, submitAnswerSchema);
-
       const { answer } = await this.submitAnswerUseCase.execute(submitAnswerInput);
 
       return AnswerPresenter.toHTTP(answer);

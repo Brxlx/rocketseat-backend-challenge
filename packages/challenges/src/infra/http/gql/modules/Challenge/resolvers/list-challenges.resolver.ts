@@ -7,23 +7,20 @@ import { ListChallengesResponse } from '../responses/list-challenges.response';
 import { ChallengePresenter } from '../presenters/challenge.presenter';
 import { ListChallengesFiltersInput } from '../inputs/list-challenges-filters.input';
 import { ResolverErrorHandler } from '../../../errors/resolver-error-handler';
-import { InputValidator } from '../../../input-validator';
 import { ListChallengesInputSchema } from '../inputs/challenge-input-validation';
+import { ValidateInput } from '@/infra/decorators/validate-input.decorator';
 
 @Resolver(() => Challenge)
 export class ListChallengesResolver {
   constructor(private listChallengesUseCase: ListChallengesUseCase) {}
 
   @Query(() => ListChallengesResponse)
+  @ValidateInput(ListChallengesInputSchema)
   public async listChallenges(
     @Args('listChallengesFiltersInput')
     { titleOrDescription, page, itemsPerPage }: ListChallengesFiltersInput,
   ): Promise<any> {
     try {
-      InputValidator.validate(
-        { titleOrDescription, itemsPerPage, page },
-        ListChallengesInputSchema,
-      );
       const { challenges, ...rest } = await this.listChallengesUseCase.execute({
         titleOrDescription,
         params: {
