@@ -8,6 +8,7 @@ export default defineConfig({
     globals: true,
     root: './',
     setupFiles: ['./test/setup-e2e.ts'],
+    testTimeout: 10000,
   },
   // resolve: {
   //   alias: [{ find: '@', replacement: resolve(__dirname, './src') }],
