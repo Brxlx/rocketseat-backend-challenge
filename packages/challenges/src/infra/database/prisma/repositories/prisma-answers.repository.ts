@@ -54,10 +54,33 @@ export class PrismaAnswersRepository implements AnswersRepository {
       where.status = filters.status.toString() as Prisma.EnumAnswerStatusFilter;
     }
 
-    if (filters.startDate || filters.endDate) {
+    if (filters.startDate && filters.endDate) {
+      const startDate = new Date(filters.startDate).toISOString();
+      // UTC to convert to UTC timezone and correct time zone adrift
+      const endDate = new Date(
+        Date.UTC(
+          filters.endDate.getFullYear(),
+          filters.endDate.getMonth(),
+          filters.endDate.getDate() + 1,
+          23,
+          59,
+          59,
+        ),
+      ).toISOString();
+
       where.createdAt = {
-        gte: filters.startDate,
-        lte: filters.endDate,
+        gte: startDate,
+        lte: endDate,
+      };
+    } else if (filters.startDate) {
+      const startDate = new Date(filters.startDate).toISOString();
+      where.createdAt = {
+        gte: startDate,
+      };
+    } else if (filters.endDate) {
+      const endDate = new Date(filters.endDate).toISOString();
+      where.createdAt = {
+        lte: endDate,
       };
     }
 
@@ -73,7 +96,7 @@ export class PrismaAnswersRepository implements AnswersRepository {
           challenge: { select: { id: true } },
         },
       }),
-      this.prisma.answer.count(),
+      this.prisma.answer.count({ where }),
     ]);
 
     return {
