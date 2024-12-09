@@ -58,6 +58,13 @@ Playground GraphQL: http://localhost:3000/gql
 - Acesse documentação abrangente
 - Teste interativo de consultas
 
+
+#### Seed
+Para popular o banco de dados com dados de exemplo, execute o seguinte comando:
+```bash
+pnpm prisma db seed
+```
+
 #### 🐳 Implantação Docker
 Um Dockerfile é fornecido na raiz do projeto para implantação conteinerizada:
 ```bash
