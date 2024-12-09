@@ -75,6 +75,17 @@ docker build -t backend-challenge .
 docker run -p 3000:3000 backend-challenge
 ```
 
+Um docker-compose.yml também está disponível para uso:
+```bash
+cd packages/challenges && docker-compose up api -d
+```
+**⚠️ Importante:** 
+- É necessário trocar as variáveis de ambiente no arquivo docker-compose.yml para as credenciais do Postgresql.
+- Também é necessário trocar as variáveis de ambiente no arquivo docker-compose.yml para as credenciais do Kafka.
+- Dependendo do sistema utilizado, o host pode variar(geralmente `0.0.0.0` ou `host.docker.internal`).
+- **É necessário iniciar o serviço do Postgres e do Kafka para que o serviço de challenges funcione corretamente.**
+
+
 #### 🔒 Segurança e Gerenciamento de Dependências
 
 Os pacotes e bibliotecas do pacote de _corrections_ forma atualizados para versões mais recentes, seguindo as versões do pacote de _challenges_ para manter compatibilidade e segurança.
