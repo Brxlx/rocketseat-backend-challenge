@@ -57,7 +57,7 @@ suite('[Answer] (E2E)', () => {
       expect(response.statusCode).toBe(200);
       expect(response.body.data.submitAnswer).toBeTruthy();
       expect(response.body.data.submitAnswer.challengeId).toEqual(challenge.id.toString());
-      expect(response.body.data.submitAnswer.status).toEqual('DONE');
+      expect(response.body.data.submitAnswer.status).toEqual('PENDING');
     });
   });
 });
