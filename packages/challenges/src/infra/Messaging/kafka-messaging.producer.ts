@@ -1,62 +1,143 @@
 import { Producer } from '@/domain/application/gateways/Messaging/producer';
 import { Answer } from '@/domain/enterprise/entities/Answer';
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
-import { lastValueFrom } from 'rxjs';
 import { PrismaService } from '../database/prisma/prisma.service';
 import { ANSWER_STATUS } from '@/core/consts/answer-status';
-
-interface CorrectLessonResponse {
-  grade: number;
-  status: string;
-}
+import { Observable, of, timer } from 'rxjs';
+import { catchError, retry, timeout } from 'rxjs/operators';
+import { CorrectLessonResponse, MessagePayload } from './types/message.types';
 
 @Injectable()
-export class KafkaMessagingProducer implements Producer, OnModuleInit {
+export class KafkaMessagingProducer implements Producer, OnModuleInit, OnModuleDestroy {
+  private readonly MAX_RETRIES = 3;
+  private readonly BASE_TIMEOUT = 300; // 30 seconds
+
+  private logger: Logger = new Logger(KafkaMessagingProducer.name);
+
   constructor(
     @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
     private readonly prisma: PrismaService,
   ) {}
 
   async onModuleInit() {
-    this.kafkaClient.subscribeToResponseOf('challenge.correction');
-    // await this.kafkaClient.connect();
+    try {
+      // await this.kafkaClient.connect();
+      this.kafkaClient.subscribeToResponseOf('challenge.correction');
+    } catch (error: any) {
+      this.logger.error('Failed to connect to Kafka:', error.message);
+    }
   }
 
-  async produce(topic: string, message: Answer) {
+  async onModuleDestroy() {
+    await this.kafkaClient.close();
+  }
+
+  async produce(topic: string, message: Answer): Promise<Answer> {
+    const messageToSend: MessagePayload = {
+      value: {
+        submissionId: message.id.toString(),
+        repositoryUrl: message.repositoryUrl,
+      },
+    };
+
     try {
-      const messageToSend = {
-        value: {
-          submissionId: message.id.toString(),
-          repositoryUrl: message.repositoryUrl,
+      // Store message in DB
+      await this.storeMessageInDB(message);
+
+      // Sends the message asynchronously
+      this.sendMessageToKafka(topic, messageToSend).subscribe({
+        next: async (response) => {
+          if (response) {
+            const { grade, status }: CorrectLessonResponse = response;
+            await this.processSuccessResponse(message, grade, status);
+            this.logger.warn('Message sent:', JSON.stringify(message));
+          } else {
+            await this.handleMessageSendingFailure(message);
+          }
         },
-      };
-      console.log('Sending message topic', messageToSend);
-
-      const { grade, status }: CorrectLessonResponse = await lastValueFrom(
-        this.kafkaClient.send(topic, {
-          value: messageToSend,
-        }),
-      );
-
-      await this.updateAnswerOnDB(message.id.toString(), grade, this.tranformStatus(status));
-      message.grade = grade;
-      message.status = this.tranformStatus(status)!;
-
-      return message;
-    } catch (err: any) {
-      console.log(`Error prodcucing message at topic ${topic}`, err);
-
-      // Update answer status to error and finalize the process
-      await this.prisma.answer.update({
-        where: {
-          id: message.id.toString(),
-        },
-        data: {
-          status: ANSWER_STATUS.ERROR,
+        error: async (error) => {
+          this.logger.error('Failed to send message to topic:', error);
+          await this.handleMessageSendingFailure(message);
         },
       });
+
+      // Returns immediately to avoid blocking the API
+      return message;
+    } catch (error: any) {
+      this.logger.error('Error in produce method:', error.message);
+      await this.handleMessageSendingFailure(message);
+      return message;
     }
+  }
+
+  private sendMessageToKafka(
+    topic: string,
+    message: MessagePayload,
+  ): Observable<CorrectLessonResponse | null> {
+    try {
+      return this.kafkaClient
+        .send<CorrectLessonResponse, { value: MessagePayload }>(topic, { value: message })
+        .pipe(
+          timeout(this.BASE_TIMEOUT),
+          retry({
+            count: this.MAX_RETRIES,
+            delay: (error, retryCount) => {
+              // Calculates exponential delay time
+              const delay_ms = this.BASE_TIMEOUT * Math.pow(2, retryCount);
+
+              this.logger.warn(
+                `Attempt ${retryCount + 1}: Retry in ${delay_ms}ms due to: ${error.message}`,
+              );
+
+              return timer(delay_ms);
+            },
+          }),
+          catchError((error) => {
+            this.logger.error('Kafka sending error after retries:', error.message);
+            return of(null);
+          }),
+        );
+    } catch (error: any) {
+      this.logger.error('Unexpected error in sendMessageToKafka:', error.message);
+      return of(null);
+    }
+  }
+
+  // TODO: use repository methods
+  private async storeMessageInDB(message: Answer) {
+    await this.prisma.answer.update({
+      where: { id: message.id.toString() },
+      data: {
+        status: ANSWER_STATUS.PENDING,
+      },
+    });
+  }
+
+  // TODO: use repository methods
+  private async processSuccessResponse(message: Answer, grade: number, status: string) {
+    const transformedStatus = this.tranformStatus(status);
+
+    await this.prisma.answer.update({
+      where: { id: message.id.toString() },
+      data: {
+        grade,
+        status: transformedStatus,
+      },
+    });
+
+    message.grade = grade;
+    message.status = transformedStatus;
+  }
+
+  // TODO: use repository methods
+  private async handleMessageSendingFailure(message: Answer) {
+    await this.prisma.answer.update({
+      where: { id: message.id.toString() },
+      data: {
+        status: ANSWER_STATUS.ERROR,
+      },
+    });
   }
 
   private tranformStatus(status: string) {
@@ -70,17 +151,5 @@ export class KafkaMessagingProducer implements Producer, OnModuleInit {
       default:
         return ANSWER_STATUS.PENDING;
     }
-  }
-
-  private async updateAnswerOnDB(submissionId: string, grade: number, status: ANSWER_STATUS) {
-    await this.prisma.answer.update({
-      where: {
-        id: submissionId,
-      },
-      data: {
-        grade,
-        status,
-      },
-    });
   }
 }

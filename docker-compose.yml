@@ -1,18 +1,18 @@
-version: "3"
+# version: "3"
 
 services:
-  postgres:
-    container_name: challenge_postgres
-    image: "bitnami/postgresql"
-    restart: always
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRESQL_USERNAME=docker
-      - POSTGRESQL_PASSWORD=docker
-      - POSTGRESQL_DATABASE=rocketseat_challenge
-    volumes:
-      - "postgresql_data:/bitnami/postgresql"
+  # postgres:
+  #   container_name: challenge_postgres
+  #   image: "bitnami/postgresql"
+  #   restart: always
+  #   ports:
+  #     - "5432:5432"
+  #   environment:
+  #     - POSTGRESQL_USERNAME=docker
+  #     - POSTGRESQL_PASSWORD=docker
+  #     - POSTGRESQL_DATABASE=rocketseat_challenge
+  #   volumes:
+  #     - "postgresql_data:/bitnami/postgresql"
 
   zookeeper:
     container_name: challenge_zookeeper

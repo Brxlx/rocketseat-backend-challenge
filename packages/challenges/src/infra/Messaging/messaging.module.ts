@@ -5,29 +5,34 @@ import { EnvModule } from '../env/env.module';
 import { DatabaseModule } from '../database/database.module';
 import { Producer } from '@/domain/application/gateways/Messaging/producer';
 import { Partitioners } from 'kafkajs';
+import { EnvService } from '../env/env.service';
 
 @Module({
   imports: [
     EnvModule,
     DatabaseModule,
-    ClientsModule.register([
+    ClientsModule.registerAsync([
       {
         name: 'KAFKA_SERVICE',
-        transport: Transport.KAFKA,
-        options: {
-          client: {
-            clientId: 'challenges',
-            brokers: ['localhost:9092'],
+        imports: [EnvModule],
+        useFactory: async (envService: EnvService) => ({
+          transport: Transport.KAFKA,
+          options: {
+            client: {
+              clientId: 'challenges',
+              brokers: envService.get('KAFKA_BROKERS').split(','),
+            },
+            consumer: {
+              groupId: 'challenges-consumer-group',
+              allowAutoTopicCreation: true,
+            },
+            producer: {
+              createPartitioner: Partitioners.LegacyPartitioner,
+              allowAutoTopicCreation: true,
+            },
           },
-          consumer: {
-            groupId: 'challenges-consumer-group',
-            allowAutoTopicCreation: true,
-          },
-          producer: {
-            createPartitioner: Partitioners.LegacyPartitioner,
-            allowAutoTopicCreation: true,
-          },
-        },
+        }),
+        inject: [EnvService],
       },
     ]),
   ],
