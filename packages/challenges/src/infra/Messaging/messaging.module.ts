@@ -23,7 +23,7 @@ import { EnvService } from '../env/env.service';
               brokers: envService.get('KAFKA_BROKERS').split(','),
             },
             consumer: {
-              groupId: 'challenges-consumer-group',
+              groupId: 'challenges-consumer',
               allowAutoTopicCreation: true,
             },
             producer: {

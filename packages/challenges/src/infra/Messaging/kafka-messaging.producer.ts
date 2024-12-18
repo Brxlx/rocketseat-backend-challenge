@@ -11,7 +11,7 @@ import { CorrectLessonResponse, MessagePayload } from './types/message.types';
 @Injectable()
 export class KafkaMessagingProducer implements Producer, OnModuleInit, OnModuleDestroy {
   private readonly MAX_RETRIES = 3;
-  private readonly BASE_TIMEOUT = 300; // 30 seconds
+  private readonly BASE_TIMEOUT = 30000; // 30 seconds
 
   private logger: Logger = new Logger(KafkaMessagingProducer.name);
 
@@ -51,7 +51,7 @@ export class KafkaMessagingProducer implements Producer, OnModuleInit, OnModuleD
           if (response) {
             const { grade, status }: CorrectLessonResponse = response;
             await this.processSuccessResponse(message, grade, status);
-            this.logger.warn('Message sent:', JSON.stringify(message));
+            this.logger.log('Message sent:', JSON.stringify(message));
           } else {
             await this.handleMessageSendingFailure(message);
           }
@@ -87,7 +87,7 @@ export class KafkaMessagingProducer implements Producer, OnModuleInit, OnModuleD
               const delay_ms = this.BASE_TIMEOUT * Math.pow(2, retryCount);
 
               this.logger.warn(
-                `Attempt ${retryCount + 1}: Retry in ${delay_ms}ms due to: ${error.message}`,
+                `Attempt ${retryCount}: Retry in ${delay_ms}ms due to: ${error.message}`,
               );
 
               return timer(delay_ms);
