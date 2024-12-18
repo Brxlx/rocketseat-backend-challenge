@@ -7,10 +7,12 @@ import { Injectable } from '@nestjs/common';
 import { PrismaAnswersMapper } from '../mappers/prisma-answers.mapper';
 
 import { Prisma } from '@prisma/client';
+import { ANSWER_STATUS } from '@/core/consts/answer-status';
 
 @Injectable()
 export class PrismaAnswersRepository implements AnswersRepository {
   constructor(private prisma: PrismaService) {}
+
   async findById(id: string): Promise<Answer | null> {
     const answer = await this.prisma.answer.findUnique({
       where: {
@@ -115,5 +117,21 @@ export class PrismaAnswersRepository implements AnswersRepository {
     });
 
     return PrismaAnswersMapper.toDomain(newAnswer);
+  }
+
+  async updateMessageStatus(id: string, status: ANSWER_STATUS): Promise<void> {
+    await this.prisma.answer.update({
+      where: { id },
+      data: { status },
+    });
+  }
+
+  async updateAnswerDetails(answer: Answer): Promise<void> {
+    const toPrismaAnswer = PrismaAnswersMapper.toPrisma(answer);
+
+    await this.prisma.answer.update({
+      where: { id: toPrismaAnswer.id },
+      data: toPrismaAnswer,
+    });
   }
 }

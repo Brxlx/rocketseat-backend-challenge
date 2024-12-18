@@ -2,11 +2,11 @@ import { Producer } from '@/domain/application/gateways/Messaging/producer';
 import { Answer } from '@/domain/enterprise/entities/Answer';
 import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
-import { PrismaService } from '../database/prisma/prisma.service';
 import { ANSWER_STATUS } from '@/core/consts/answer-status';
 import { Observable, of, timer } from 'rxjs';
 import { catchError, retry, timeout } from 'rxjs/operators';
 import { CorrectLessonResponse, MessagePayload } from './types/message.types';
+import { AnswersRepository } from '@/domain/application/repositories/answers.repository';
 
 @Injectable()
 export class KafkaMessagingProducer implements Producer, OnModuleInit, OnModuleDestroy {
@@ -17,7 +17,7 @@ export class KafkaMessagingProducer implements Producer, OnModuleInit, OnModuleD
 
   constructor(
     @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
-    private readonly prisma: PrismaService,
+    private readonly answersRepository: AnswersRepository,
   ) {}
 
   async onModuleInit() {
@@ -104,40 +104,22 @@ export class KafkaMessagingProducer implements Producer, OnModuleInit, OnModuleD
     }
   }
 
-  // TODO: use repository methods
   private async storeMessageInDB(message: Answer) {
-    await this.prisma.answer.update({
-      where: { id: message.id.toString() },
-      data: {
-        status: ANSWER_STATUS.PENDING,
-      },
-    });
+    await this.answersRepository.updateMessageStatus(message.id.toString(), ANSWER_STATUS.PENDING);
   }
 
-  // TODO: use repository methods
   private async processSuccessResponse(message: Answer, grade: number, status: string) {
     const transformedStatus = this.tranformStatus(status);
 
-    await this.prisma.answer.update({
-      where: { id: message.id.toString() },
-      data: {
-        grade,
-        status: transformedStatus,
-      },
-    });
-
+    // Update the message with the new status and grade
     message.grade = grade;
     message.status = transformedStatus;
+
+    await this.answersRepository.updateAnswerDetails(message);
   }
 
-  // TODO: use repository methods
   private async handleMessageSendingFailure(message: Answer) {
-    await this.prisma.answer.update({
-      where: { id: message.id.toString() },
-      data: {
-        status: ANSWER_STATUS.ERROR,
-      },
-    });
+    await this.answersRepository.updateMessageStatus(message.id.toString(), ANSWER_STATUS.ERROR);
   }
 
   private tranformStatus(status: string) {
