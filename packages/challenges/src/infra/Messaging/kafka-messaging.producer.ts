@@ -7,18 +7,23 @@ import { Observable, of, timer } from 'rxjs';
 import { catchError, retry, timeout } from 'rxjs/operators';
 import { CorrectLessonResponse, MessagePayload } from './types/message.types';
 import { AnswersRepository } from '@/domain/application/repositories/answers.repository';
+import { EnvService } from '../env/env.service';
 
 @Injectable()
 export class KafkaMessagingProducer implements Producer, OnModuleInit, OnModuleDestroy {
-  private readonly MAX_RETRIES = 3;
-  private readonly BASE_TIMEOUT = 30000; // 30 seconds
+  protected readonly MAX_RETRIES: number;
+  protected readonly BASE_TIMEOUT: number;
 
   private logger: Logger = new Logger(KafkaMessagingProducer.name);
 
   constructor(
     @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
     private readonly answersRepository: AnswersRepository,
-  ) {}
+    private readonly envService: EnvService,
+  ) {
+    this.MAX_RETRIES = Number(this.envService.get('KAFKA_BASE_RETRY'));
+    this.BASE_TIMEOUT = Number(this.envService.get('KAFKA_BASE_TIMEOUT'));
+  }
 
   async onModuleInit() {
     try {
@@ -71,7 +76,7 @@ export class KafkaMessagingProducer implements Producer, OnModuleInit, OnModuleD
     }
   }
 
-  private sendMessageToKafka(
+  protected sendMessageToKafka(
     topic: string,
     message: MessagePayload,
   ): Observable<CorrectLessonResponse | null> {

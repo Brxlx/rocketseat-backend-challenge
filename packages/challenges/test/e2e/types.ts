@@ -3,6 +3,7 @@ export interface BatchConfig {
   batchSize: number; // Tamanho de cada batch
   delayBetweenBatches: number; // Delay entre batches em ms
   concurrentRequests: number; // Número máximo de requisições concorrentes
+  requestTimeout?: number;
 }
 
 export interface TestMetrics {

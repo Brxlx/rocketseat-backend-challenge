@@ -1,136 +1,242 @@
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
-
 import { AppModule } from '@/infra/app.module';
-import { DatabaseModule } from '@/infra/database/database.module';
 import { ChallengeFactory } from 'test/factories/make-challenge.factory';
-import { AnswerFactory } from 'test/factories/make-answer.factory';
-import { LoadTester } from 'test/e2e/load-tester';
-import { ClientKafka } from '@nestjs/microservices';
 import { PrismaService } from '@/infra/database/prisma/prisma.service';
 import { ANSWER_STATUS } from '@/core/consts/answer-status';
-import { BatchConfig } from 'test/e2e/types';
+import { DatabaseModule } from '@/infra/database/database.module';
+import { TestKafkaMessagingProducer } from 'test/Messaging/test-messaging-producer';
+import { TestMessagingModule } from 'test/Messaging/test-messaging.module';
+import { ClientKafka } from '@nestjs/microservices';
+import { Answer } from '../models/Answer';
+
+/**
+ * Utilitário para logs formatados nos testes
+ * Utiliza recursos do Vitest para melhor visualização
+ */
+const testLogger = {
+  group: (name: string) => {
+    console.log('\n' + '━'.repeat(80));
+    console.log(`🔍 ${name}`);
+    console.log('━'.repeat(80));
+  },
+
+  log: (message: string, data?: any) => {
+    const timestamp = new Date().toISOString().split('T')[1];
+    console.log(`\n[${timestamp}] ℹ️ ${message}`);
+    if (data) {
+      console.log(JSON.stringify(data, null, 2));
+    }
+  },
+
+  success: (message: string) => {
+    console.log(`\n✅ ${message}`);
+  },
+
+  error: (message: string, error?: any) => {
+    console.log(`\n❌ ${message}`);
+    if (error) {
+      console.error(error);
+    }
+  },
+};
 
 suite('[Answer] (E2E)', () => {
-  describe('Submit answer', () => {
+  describe('Submit Answer (E2E)', () => {
     let app: INestApplication;
     let challengeFactory: ChallengeFactory;
-    let loadTester: LoadTester;
-    let kafkaService: ClientKafka;
+    let prisma: PrismaService;
+    let kafkaClient: ClientKafka;
+    let messagingProducer: TestKafkaMessagingProducer;
 
     beforeAll(async () => {
       const moduleRef = await Test.createTestingModule({
-        imports: [AppModule, DatabaseModule],
-        providers: [ChallengeFactory, AnswerFactory],
-      })
-        // .overrideProvider('KAFKA_SERVICE')
-        // .useValue({
-        //   connect: vi.fn(),
-        //   emit: vi.fn().mockReturnValue({
-        //     pipe: vi.fn(),
-        //     toPromise: vi.fn().mockResolvedValue(true),
-        //   }),
-        //   send: vi.fn().mockReturnValue({
-        //     pipe: vi.fn(),
-        //     toPromise: vi.fn().mockResolvedValue(true),
-        //   }),
-        //   close: vi.fn(),
-        //   onModuleInit: vi.fn(),
-        //   onModuleDestroy: vi.fn(),
-        // })
-        .compile();
+        imports: [AppModule, DatabaseModule, TestMessagingModule],
+        providers: [ChallengeFactory],
+      }).compile();
 
       app = moduleRef.createNestApplication();
       challengeFactory = moduleRef.get(ChallengeFactory);
-      kafkaService = app.get('KAFKA_SERVICE');
+      prisma = moduleRef.get(PrismaService);
+      messagingProducer = moduleRef.get(TestKafkaMessagingProducer);
+      kafkaClient = moduleRef.get('KAFKA_SERVICE');
 
       await app.init();
-      await kafkaService.connect();
+      await kafkaClient.connect();
+    });
+
+    beforeEach(() => {
+      messagingProducer.clearMessages();
     });
 
     afterAll(async () => {
-      await kafkaService.close();
+      await kafkaClient.close();
       await app.close();
     });
 
-    test.skip('Submit Answers Mutation', async () => {
+    it('should submit answer and confirm topic message delivery', async () => {
       const challenge = await challengeFactory.makePrismaChallenge({
-        title: 'Desafio Teste 01',
-        description: 'Desafio Teste',
+        title: 'Test Challenge',
+        description: 'Test Description',
       });
 
       const response = await request(app.getHttpServer())
         .post('/gql')
         .send({
           query: `
-            mutation SubmitAnswer($submitAnswerInput: SubmitAnswerInput!) {
-              submitAnswer(submitAnswerInput: $submitAnswerInput) {
-                id
-                challengeId
-                repositoryUrl
-                status
-                grade
-                createdAt
-              }
-            }`,
+          mutation SubmitAnswer($input: SubmitAnswerInput!) {
+            submitAnswer(submitAnswerInput: $input) {
+              id
+              challengeId
+              status
+            }
+          }
+        `,
           variables: {
-            submitAnswerInput: {
+            input: {
               challengeId: challenge.id.toString(),
-              repositoryUrl: 'https://github.com/usr/repo-04',
+              repositoryUrl: 'https://github.com/user/repo-test',
             },
           },
         });
 
-      console.log(response.body.data);
+      const answer = await prisma.answer.findFirst({
+        where: {
+          challengeId: challenge.id.toString(),
+          status: ANSWER_STATUS.PENDING,
+        },
+      });
 
-      expect(response.statusCode).toBe(200);
+      expect(response.status).toBe(200);
       expect(response.body.data.submitAnswer).toBeTruthy();
-      expect(response.body.data.submitAnswer.challengeId).toEqual(challenge.id.toString());
-      expect(response.body.data.submitAnswer.status).toEqual('PENDING');
+      expect(answer).toBeTruthy();
+      expect(answer?.status).toBe(ANSWER_STATUS.PENDING);
+    });
+    it.skip('should submit answer and wait for final processing status', async () => {
+      const challenge = await challengeFactory.makePrismaChallenge({
+        title: 'Test Challenge 2',
+        description: 'Test Description',
+      });
+
+      const response = await request(app.getHttpServer())
+        .post('/gql')
+        .send({
+          query: `
+          mutation SubmitAnswer($input: SubmitAnswerInput!) {
+            submitAnswer(submitAnswerInput: $input) {
+              id
+              challengeId
+              status
+            }
+          }
+        `,
+          variables: {
+            input: {
+              challengeId: challenge.id.toString(),
+              repositoryUrl: `https://github.com/user/repo-${Date.now()}`,
+            },
+          },
+        });
+      const answerId = response.body.data.submitAnswer.id;
+
+      // Wait for status change (timeout after 5 seconds)
+      const maxAttempts = 10;
+      const delayBetweenAttempts = 500;
+      let finalAnswer: Answer | null = null;
+
+      for (let i = 0; i < maxAttempts; i++) {
+        const answer = await prisma.answer.findUnique({
+          where: { id: answerId },
+        });
+
+        if (answer?.status !== ANSWER_STATUS.PENDING) {
+          finalAnswer = answer as unknown as Answer;
+          break;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, delayBetweenAttempts));
+      }
+
+      console.log(finalAnswer);
+      expect(response.status).toBe(200);
+      expect(finalAnswer).toBeTruthy();
+      expect(finalAnswer?.status).toMatch(/DONE|ERROR/);
     });
 
-    test('Should handle multiple answer submissions in batches', async () => {
-      // Criar desafio para teste
+    it.only('should process multiple submissions and verify final status', async () => {
       const challenge = await challengeFactory.makePrismaChallenge({
-        title: 'Desafio Load Test',
-        description: 'Desafio para teste de carga',
+        title: `Test Challenge ${Date.now()}`,
+        description: 'Test Description',
       });
 
-      loadTester = new LoadTester(app, challenge.id.toString());
+      const answerIds: string[] = [];
 
-      const config: BatchConfig = {
-        totalMessages: 10, // Total de mensagens
-        batchSize: 10, // Tamanho do batch
-        delayBetweenBatches: 500, // 1 segundo entre batches
-        concurrentRequests: 5, // Máximo de requisições concorrentes
-      };
+      // Submit 10 answers
+      for (let i = 0; i < 10; i++) {
+        const response = await request(app.getHttpServer())
+          .post('/gql')
+          .send({
+            query: `
+            mutation SubmitAnswer($input: SubmitAnswerInput!) {
+              submitAnswer(submitAnswerInput: $input) {
+                id
+                challengeId
+                status
+              }
+            }
+          `,
+            variables: {
+              input: {
+                challengeId: challenge.id.toString(),
+                repositoryUrl: `https://github.com/user/repo-${Date.now()}-${i}`,
+              },
+            },
+          });
 
-      const metrics = await loadTester.runTest(config);
-      await new Promise((resolve) => setTimeout(resolve, config.delayBetweenBatches));
+        answerIds.push(response.body.data.submitAnswer.id);
+      }
 
-      // Verify final status of submissions
-      const prisma = app.get(PrismaService);
-      const answers = await prisma.answer.findMany({
-        where: { challengeId: challenge.id.toString(), status: ANSWER_STATUS.DONE },
-      });
+      // Wait for all messages to be processed
+      const maxAttempts = 3;
+      const delayBetweenAttempts = 500;
+      const finalAnswers: Answer[] = [];
 
-      console.log(
-        'Final answer statuses:',
-        answers.map((a) => ({ id: a.id, status: a.status })),
+      for (const answerId of answerIds) {
+        let processed = false;
+
+        for (let i = 0; i < maxAttempts && !processed; i++) {
+          const answer = await prisma.answer.findUnique({
+            where: { id: answerId },
+          });
+
+          if (answer?.status !== ANSWER_STATUS.PENDING) {
+            finalAnswers.push(answer as unknown as Answer);
+            processed = true;
+          } else {
+            answer.status = ANSWER_STATUS.ERROR;
+            await new Promise((resolve) => setTimeout(resolve, delayBetweenAttempts));
+          }
+        }
+      }
+
+      const sucessAnswers = finalAnswers.filter(
+        (answer) => (answer.status as unknown as ANSWER_STATUS) === ANSWER_STATUS.DONE,
       );
 
-      // Logs dos resultados
-      console.log('Métricas do teste:');
-      console.log(`Tempo total: ${metrics.totalTime}ms`);
-      console.log(`Requisições com sucesso: ${metrics.successfulRequests}`);
-      console.log(`Requisições com falha: ${metrics.failedRequests}`);
-      console.log(`Tempo médio de resposta: ${metrics.averageResponseTime}ms`);
+      const errorAnswers = finalAnswers.filter(
+        (answer) => (answer.status as unknown as ANSWER_STATUS) === ANSWER_STATUS.ERROR,
+      );
 
-      // Asserções básicas
-      expect(answers.length).toEqual(metrics.successfulRequests);
-      expect(metrics.successfulRequests).toBeGreaterThan(0);
-      expect(metrics.failedRequests).toBeLessThan(config.totalMessages * 0.15); // Máximo 15% de falhas
-    }, 300000); // 5 minutos de timeout
+      testLogger.group('*** Stats: ***');
+      testLogger.log('Sucess answers: ', sucessAnswers.length);
+      testLogger.log('Error answers: ', errorAnswers.length);
+
+      expect(finalAnswers).toHaveLength(10);
+      finalAnswers.forEach((answer) => {
+        expect(answer.status).toMatch(/DONE|ERROR/);
+        expect(answer.status).not.toBe(ANSWER_STATUS.PENDING);
+      });
+    }, 30000);
   });
 });

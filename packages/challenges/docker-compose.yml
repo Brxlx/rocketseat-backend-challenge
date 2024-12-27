@@ -10,4 +10,4 @@ services:
       - .env
     environment:
       - DATABASE_URL=postgresql://${DB_USER}:${DB_PASS}@host.docker.internal:5432/${DB_DB}?schema=public
-      - KAFKA_URL=host.docker.internal:9092
+      - KAFKA_BROKERS=host.docker.internal:9094
