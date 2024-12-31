@@ -24,13 +24,13 @@ export class ResolverErrorHandler {
    * @param customErrorMap Mapa de erros personalizado (opcional)
    * @returns Erro GraphQL tratado
    */
-  public static handle(err: any, customErrorMap: ErrorMap[] = []): never {
+  public static handle(err: any, customErrorMap: ErrorMap[] = []): any {
     const errorMap = [...this.defaultErrorMap, ...customErrorMap];
 
     const matchedError = errorMap.find(({ errorClass }) => err instanceof errorClass);
 
     if (matchedError) {
-      throw new matchedError.graphqlError(err.message);
+      return new matchedError.graphqlError(err.message);
     }
 
     this.logger.error('Unhandled error in resolver', err);
