@@ -199,7 +199,7 @@ suite('[Answer] (E2E)', () => {
 
       // Wait for all messages to be processed
       const maxAttempts = 3;
-      const delayBetweenAttempts = 500;
+      const delayBetweenAttempts = 650;
       const finalAnswers: Answer[] = [];
 
       for (const answerId of answerIds) {
@@ -229,8 +229,8 @@ suite('[Answer] (E2E)', () => {
       );
 
       testLogger.group('*** Stats: ***');
-      testLogger.log('Sucess answers: ', sucessAnswers.length);
-      testLogger.log('Error answers: ', errorAnswers.length);
+      testLogger.log('Sucess answers: ', sucessAnswers.length.toString());
+      testLogger.log('Error answers: ', errorAnswers.length.toString());
 
       expect(finalAnswers).toHaveLength(10);
       finalAnswers.forEach((answer) => {
