@@ -15,6 +15,8 @@ import { ListAnswersResolver } from './modules/Answer/resolvers/list-answers.res
 import { EditChallengeResolver } from './modules/Challenge/resolvers/edit-challenge.resolver';
 import { DeleteChallengeResolver } from './modules/Challenge/resolvers/delete-challenge.resolver';
 import { ListChallengesResolver } from './modules/Challenge/resolvers/list-challenges.resolver';
+import { ResolverErrorInterceptor } from '@/infra/interceptors/resolver-error.interceptor';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -35,6 +37,10 @@ import { ListChallengesResolver } from './modules/Challenge/resolvers/list-chall
     AnswerModule,
   ],
   providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResolverErrorInterceptor,
+    },
     UUIDResolver,
     CreateChallengeResolver,
     EditChallengeResolver,

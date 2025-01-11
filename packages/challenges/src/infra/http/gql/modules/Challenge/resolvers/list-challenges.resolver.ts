@@ -6,7 +6,6 @@ import { ListChallengesUseCase } from '@/domain/application/use-cases/Challenge/
 import { ListChallengesResponse } from '../responses/list-challenges.response';
 import { ChallengePresenter } from '../presenters/challenge.presenter';
 import { ListChallengesFiltersInput } from '../inputs/list-challenges-filters.input';
-import { ResolverErrorHandler } from '../../../errors/resolver-error-handler';
 import { ListChallengesInputSchema } from '../inputs/challenge-input-validation';
 import { ValidateInput } from '@/infra/decorators/validate-input.decorator';
 
@@ -20,18 +19,14 @@ export class ListChallengesResolver {
     @Args('listChallengesFiltersInput', { description: 'Filtros e paginação' })
     { titleOrDescription, page, itemsPerPage }: ListChallengesFiltersInput,
   ): Promise<any> {
-    try {
-      const { challenges, ...rest } = await this.listChallengesUseCase.execute({
-        titleOrDescription,
-        params: {
-          page,
-          itemsPerPage,
-        },
-      });
+    const { challenges, ...rest } = await this.listChallengesUseCase.execute({
+      titleOrDescription,
+      params: {
+        page,
+        itemsPerPage,
+      },
+    });
 
-      return { ...rest, challenges: challenges.map(ChallengePresenter.toHTTP) };
-    } catch (err: any) {
-      return ResolverErrorHandler.handle(err);
-    }
+    return { ...rest, challenges: challenges.map(ChallengePresenter.toHTTP) };
   }
 }

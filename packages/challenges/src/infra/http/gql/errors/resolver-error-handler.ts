@@ -2,10 +2,11 @@ import { Logger } from '@nestjs/common';
 
 import { InternalServerErrorGraphQLError } from './internal-server-error-gql.error';
 import { ZodValidationError } from './zod-validation.error';
+import { GraphQLError } from 'graphql';
 
 interface ErrorMap {
-  errorClass: any;
-  graphqlError: any;
+  errorClass: new (...args: any[]) => Error;
+  graphqlError: new (...args: any[]) => GraphQLError;
 }
 
 export class ResolverErrorHandler {

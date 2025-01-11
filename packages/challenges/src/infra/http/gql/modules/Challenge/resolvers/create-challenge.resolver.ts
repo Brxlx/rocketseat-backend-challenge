@@ -5,7 +5,6 @@ import { Challenge } from '../models/Challenge';
 
 import { CreateChallengeInput } from '../inputs/create-challenge.input';
 import { CreateChallengeInputSchema } from '../inputs/challenge-input-validation';
-import { ResolverErrorHandler } from '../../../errors/resolver-error-handler';
 import { ValidateInput } from '@/infra/decorators/validate-input.decorator';
 
 @Resolver(() => Challenge)
@@ -18,12 +17,8 @@ export class CreateChallengeResolver {
     @Args('createChallengeInput', { description: 'Dados necessaŕios para criar um novo desafio' })
     createChallengeInput: CreateChallengeInput,
   ) {
-    try {
-      const { challenge } = await this.createChallengeUseCase.execute(createChallengeInput);
+    const { challenge } = await this.createChallengeUseCase.execute(createChallengeInput);
 
-      return challenge.id.toString();
-    } catch (err: any) {
-      return ResolverErrorHandler.handle(err.message);
-    }
+    return challenge.id.toString();
   }
 }
