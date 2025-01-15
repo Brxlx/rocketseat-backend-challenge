@@ -41,7 +41,6 @@ export class ResolverErrorInterceptor implements NestInterceptor {
           // throw error;
         }
         // Register and Map all possible errors to GraphQL errors
-        // TODO: Register all possible errors
         const handledError = ResolverErrorHandler.handle(error, [
           {
             errorClass: ChallengeNotFoundError,
