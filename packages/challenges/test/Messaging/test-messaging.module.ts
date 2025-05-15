@@ -19,7 +19,7 @@ import { DatabaseModule } from '@/infra/database/database.module';
           options: {
             client: {
               clientId: 'challenges-test',
-              brokers: [envService.get('KAFKA_BROKERS')],
+              brokers: envService.get('KAFKA_BROKERS').split(','),
             },
             consumer: {
               groupId: 'challenges-test-consumer',

@@ -3,7 +3,7 @@ import { Answer } from '@/domain/enterprise/entities/Answer';
 
 export class FakeMessaging implements Producer {
   async produce(topic: string | string[], message: Answer): Promise<Answer | undefined> {
-    console.log(`Producing to topic ${topic} the message:  ${message}`);
+    console.log(`Producing to topic ${topic} the message:  ${JSON.stringify(message)}`);
     return Answer.create({
       challengeId: message.challengeId,
       repositoryUrl: message.repositoryUrl,

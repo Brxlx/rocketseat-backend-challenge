@@ -54,7 +54,7 @@ export class KafkaMessagingProducer implements Producer, OnModuleInit, OnModuleD
       this.sendMessageToKafka(topic, messageToSend).subscribe({
         next: async (response) => {
           if (response) {
-            const { grade, status }: CorrectLessonResponse = response;
+            const { grade, status } = response;
             await this.processSuccessResponse(message, grade, status);
             this.logger.log('Message sent:', JSON.stringify(message));
           } else {
