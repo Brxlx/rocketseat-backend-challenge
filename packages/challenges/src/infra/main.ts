@@ -10,7 +10,7 @@ async function bootstrap() {
 
   const port = app.get(EnvService).get('APP_PORT');
 
-  await app.listen(port ?? 3000, () => {
+  await app.listen(port ?? 3000, '0.0.0.0', () => {
     logger.log(`Server is running on port ${port}`);
   });
 }

@@ -8,7 +8,9 @@ export const envSchema = z.object({
   DB_PASS: z.string(),
   DB_NAME: z.string(),
   DATABASE_URL: z.string().url(),
-  KAFKA_URL: z.string().url(),
+  KAFKA_BROKERS: z.string().url(),
+  KAFKA_BASE_RETRY: z.coerce.number().optional().default(3),
+  KAFKA_BASE_TIMEOUT: z.coerce.number().optional().default(30000),
 });
 
 export type Env = z.infer<typeof envSchema>;

@@ -2,6 +2,7 @@ import { ZodSchema, ZodError, ZodObject } from 'zod';
 import { ValidationErrorItem, FormattedValidationError } from '../types/validation-error';
 import { ValidationGraphQLError } from '../http/gql/errors/validation-gql.error';
 import { HttpStatus } from '@nestjs/common';
+import { of } from 'rxjs';
 
 /**
  * A decorator function that validates the input of a method using a Zod schema.
@@ -30,11 +31,13 @@ export function ValidateInput(schema: ZodSchema) {
 
       if (!result.success) {
         const formattedError = formatZodError(result.error);
-        throw new ValidationGraphQLError('Input validation failed', HttpStatus.BAD_REQUEST, {
-          code: 'ZOD_VALIDATION_ERROR',
-          validationErrors: formattedError.errors,
-          name: 'ValidationError',
-        });
+        return of(
+          new ValidationGraphQLError('Input validation failed', HttpStatus.BAD_REQUEST, {
+            code: 'ZOD_VALIDATION_ERROR',
+            validationErrors: formattedError.errors,
+            name: 'ValidationError',
+          }),
+        );
       }
 
       args[0] = result.data;

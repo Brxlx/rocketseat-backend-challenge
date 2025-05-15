@@ -1,3 +1,4 @@
+import { ANSWER_STATUS } from '@/core/consts/answer-status';
 import { AnswerFilters } from '@/core/repositories/answer-filters';
 import { PaginationParams } from '@/core/repositories/pagination-params';
 import { Answer } from '@/domain/enterprise/entities/Answer';
@@ -10,4 +11,6 @@ export abstract class AnswersRepository {
     params: PaginationParams,
   ): Promise<{ answers: Answer[]; total: number; page: number; itemsPerPage: number }>;
   abstract create(answer: Answer): Promise<Answer>;
+  abstract updateMessageStatus(id: string, status: ANSWER_STATUS): Promise<void>;
+  abstract updateAnswerDetails(answer: Answer): Promise<void>;
 }

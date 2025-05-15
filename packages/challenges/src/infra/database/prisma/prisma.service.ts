@@ -43,6 +43,8 @@ export class PrismaService
     });
 
     this.$on('info', (event) => {
+      if (event.target === 'postgres') return;
+
       this.logger.log(`INFO: ${event.message}`);
     });
 
