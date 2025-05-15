@@ -16,52 +16,7 @@ import {
 import request from 'supertest';
 import { Challenge } from '@/domain/enterprise/entities/Challenge';
 import { EnvService } from '@/infra/env/env.service';
-/**
- * Interface para configuração do teste de carga
- */
-export interface LoadTestConfig {
-  parallelMessages: number;
-  delayBetweenMessages: number;
-  numOfBatches: number;
-  batchSize: number;
-  pollInterval: number;
-  maxAttempts: number;
-}
-
-/**
- * Interface para resultado de uma submissão
- */
-export interface SubmissionResult {
-  answerId: string;
-  status: ANSWER_STATUS;
-  attempts: number;
-  processingTime: number;
-}
-
-/**
- * Interface para métricas do teste
- */
-export interface TestMetrics {
-  totalSubmissions: number;
-  successfulSubmissions: number;
-  failedSubmissions: number;
-  successRate: string;
-  errorRate: string;
-  totalTime: number;
-  averageTimePerRequest: number;
-  averageProcessingTime: number;
-}
-
-/**
- * Token para injeção da aplicação NestJS
- */
-export const NEST_APP_TOKEN = 'NEST_APP_TOKEN';
-
-// Criamos um provider factory para o app
-export const createAppProvider = (app: INestApplication) => ({
-  provide: NEST_APP_TOKEN,
-  useValue: app,
-});
+import { LoadTestConfig, SubmissionResult, TestMetrics } from './load-test.types';
 
 /**
  * Classe responsável por executar e gerenciar testes de carga
@@ -81,7 +36,7 @@ export class LoadTestService {
    * Método para configurar a instância da aplicação
    * @param app Instância do NestApplication
    */
-  setApp(app: INestApplication) {
+  public setApp(app: INestApplication) {
     console.log('Setting up app...');
     if (!app) {
       throw new Error('NestApplication instance cannot be null or undefined');

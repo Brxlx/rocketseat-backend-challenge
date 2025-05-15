@@ -5,10 +5,11 @@ import { PrismaService } from '@/infra/database/prisma/prisma.service';
 import { DatabaseModule } from '@/infra/database/database.module';
 import { TestMessagingModule } from 'test/Messaging/test-messaging.module';
 import { ClientKafka } from '@nestjs/microservices';
-import { LoadTestConfig, LoadTestService } from 'test/load/load-test.service';
+import { LoadTestService } from 'test/load/load-test.service';
 import { TestKafkaMessagingProducer } from 'test/Messaging/test-messaging-producer';
 import { EnvModule } from '@/infra/env/env.module';
 import { AppModule } from '@/infra/app.module';
+import { LoadTestConfig } from './load-test.types';
 
 /**
  * Load test suite
@@ -67,17 +68,17 @@ suite('[Load Test]', () => {
         const config: LoadTestConfig = {
           parallelMessages: 10,
           batchSize: 10,
-          numOfBatches: 1,
+          numOfBatches: 10,
           maxAttempts: 1,
           pollInterval: 500,
-          delayBetweenMessages: 200,
+          delayBetweenMessages: 50,
         };
 
         const results = await loadTestService.executeLoadTest(challenge, config);
 
         expect(results.totalSubmissions).toBe(config.batchSize * config.numOfBatches);
         expect(results.successRate).not.toBe('0.00%');
-        expect(results.averageProcessingTime).toBeLessThan(30000);
+        expect(results.averageProcessingTime).toBeLessThan(TIMEOUT);
         expect(results.failedSubmissions).toBeLessThan(results.totalSubmissions);
       },
       TIMEOUT,
