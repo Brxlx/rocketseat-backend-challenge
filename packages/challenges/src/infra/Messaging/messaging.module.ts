@@ -6,6 +6,7 @@ import { DatabaseModule } from '../database/database.module';
 import { Producer } from '@/domain/application/gateways/Messaging/producer';
 import { Partitioners } from 'kafkajs';
 import { EnvService } from '../env/env.service';
+import { StatusTransformerService } from './status-transformer.service';
 
 @Module({
   imports: [
@@ -36,7 +37,7 @@ import { EnvService } from '../env/env.service';
       },
     ]),
   ],
-  providers: [{ provide: Producer, useClass: KafkaMessagingProducer }],
-  exports: [ClientsModule, Producer],
+  providers: [{ provide: Producer, useClass: KafkaMessagingProducer }, StatusTransformerService],
+  exports: [Producer, StatusTransformerService],
 })
 export class MessagingModule {}

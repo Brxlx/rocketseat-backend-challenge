@@ -56,8 +56,6 @@ export class SubmitAnswerUseCase {
 
     if (!response) throw new SendingToTopicError();
 
-    // await this.producer.(updatedAnswer);
-
     return { answer };
   }
 

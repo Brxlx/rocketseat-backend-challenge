@@ -11,6 +11,7 @@ export const envSchema = z.object({
   KAFKA_BROKERS: z.string().url(),
   KAFKA_BASE_RETRY: z.coerce.number().optional().default(3),
   KAFKA_BASE_TIMEOUT: z.coerce.number().optional().default(30000),
+  KAFKA_CIRCUIT_BREAKER_THRESHOLD: z.coerce.number().optional().default(5),
 });
 
 export type Env = z.infer<typeof envSchema>;
