@@ -7,11 +7,14 @@ import { Producer } from '@/domain/application/gateways/Messaging/producer';
 import { Partitioners } from 'kafkajs';
 import { EnvService } from '../env/env.service';
 import { StatusTransformerService } from './status-transformer.service';
+import { StatusTransformer } from '@/domain/application/gateways/Messaging/status-transformer';
+import { CircuitBreakerModule } from '../Circuit Breaker/circuit-breaker.module';
 
 @Module({
   imports: [
     EnvModule,
     DatabaseModule,
+    CircuitBreakerModule,
     ClientsModule.registerAsync([
       {
         name: 'KAFKA_SERVICE',
@@ -37,7 +40,10 @@ import { StatusTransformerService } from './status-transformer.service';
       },
     ]),
   ],
-  providers: [{ provide: Producer, useClass: KafkaMessagingProducer }, StatusTransformerService],
-  exports: [Producer, StatusTransformerService],
+  providers: [
+    { provide: Producer, useClass: KafkaMessagingProducer },
+    { provide: StatusTransformer, useClass: StatusTransformerService },
+  ],
+  exports: [Producer, StatusTransformer],
 })
 export class MessagingModule {}

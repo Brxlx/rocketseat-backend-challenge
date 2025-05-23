@@ -16,25 +16,26 @@ import { AnswersRepository } from '@/domain/application/repositories/answers.rep
 import { EnvService } from '../env/env.service';
 import { ProducerError } from '@/domain/application/gateways/Messaging/errors/producer-error';
 import { StatusTransformer } from '@/domain/application/gateways/Messaging/status-transformer';
-import { StatusTransformerService } from './status-transformer.service';
-import { CircuitBreakerService } from '../Circuit Breaker/circuit-breaker.service';
-import { CircuitBreakerGetState } from '@/domain/application/gateways/Circuit Breaker/circuit-breaker';
+import {
+  CircuitBreaker,
+  CircuitBreakerGetState,
+} from '@/domain/application/gateways/Circuit Breaker/circuit-breaker';
 
 @Injectable()
 export class KafkaMessagingProducer implements Producer, OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(KafkaMessagingProducer.name);
   private readonly config: KafkaProducerConfig;
   private readonly metrics: ProducerMetrics;
-  private readonly statusTransformer: StatusTransformer;
-  // TODO: Refatorar para usar injeção de dependência
-  private readonly circuitBreaker: CircuitBreakerService;
 
   private isConnected = false;
 
   constructor(
-    @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
+    @Inject('KAFKA_SERVICE')
+    private readonly kafkaClient: ClientKafka,
     private readonly answersRepository: AnswersRepository,
     private readonly envService: EnvService,
+    private readonly statusTransformer: StatusTransformer,
+    private readonly circuitBreaker: CircuitBreaker,
   ) {
     // Configuração centralizada com valores padrão
     this.config = {
@@ -50,18 +51,12 @@ export class KafkaMessagingProducer implements Producer, OnModuleInit, OnModuleD
       messagesFailures: 0,
       consecutiveFailures: 0,
     };
-    // TODO: Refatorar para usar injeção de dependência
-    this.statusTransformer = new StatusTransformerService();
-    this.circuitBreaker = new CircuitBreakerService(this.config.circuitBreakerThreshold);
   }
 
-  /**
-   * Inicialização do módulo com melhor tratamento de erro
-   */
   async onModuleInit(): Promise<void> {
     try {
       this.kafkaClient.subscribeToResponseOf('challenge.correction');
-      await this.kafkaClient.connect();
+      // await this.kafkaClient.connect();
       this.isConnected = true;
 
       this.logger.log('Kafka Producer inicializado com sucesso');
@@ -83,9 +78,6 @@ export class KafkaMessagingProducer implements Producer, OnModuleInit, OnModuleD
     }
   }
 
-  /**
-   * Destruição do módulo com cleanup adequado
-   */
   async onModuleDestroy(): Promise<void> {
     if (this.isConnected) {
       try {
@@ -139,32 +131,26 @@ export class KafkaMessagingProducer implements Producer, OnModuleInit, OnModuleD
     }
   }
 
-  /**
-   * Valida os parâmetros de entrada
-   */
   private validateInput(topic: string, message: Answer): void {
     if (!topic?.trim()) {
-      throw new ProducerError('Tópico não pode ser vazio', ProducerErrorType.SERIALIZATION_ERROR);
+      throw new ProducerError('O tópico não pode ser vazio', ProducerErrorType.SERIALIZATION_ERROR);
     }
 
     if (!message?.id) {
       throw new ProducerError(
-        'Mensagem deve conter ID válido',
+        'A mensagem deve conter ID válido',
         ProducerErrorType.SERIALIZATION_ERROR,
       );
     }
 
     if (!message?.repositoryUrl?.trim()) {
       throw new ProducerError(
-        'Repository URL é obrigatório',
+        'A URL do repositório é obrigatória',
         ProducerErrorType.SERIALIZATION_ERROR,
       );
     }
   }
 
-  /**
-   * Prepara o payload da mensagem
-   */
   private prepareMessagePayload(message: Answer): MessagePayload {
     return {
       value: {
@@ -176,9 +162,6 @@ export class KafkaMessagingProducer implements Producer, OnModuleInit, OnModuleD
     };
   }
 
-  /**
-   * Armazena estado inicial da mensagem no banco
-   */
   private async storeInitialMessageState(message: Answer): Promise<void> {
     try {
       await this.answersRepository.updateMessageStatus(
@@ -194,9 +177,6 @@ export class KafkaMessagingProducer implements Producer, OnModuleInit, OnModuleD
     }
   }
 
-  /**
-   * Envia mensagem de forma assíncrona com melhor tratamento de erro
-   */
   private sendMessageAsync(
     topic: string,
     messagePayload: MessagePayload,
@@ -225,9 +205,6 @@ export class KafkaMessagingProducer implements Producer, OnModuleInit, OnModuleD
     });
   }
 
-  /**
-   * Envia mensagem para Kafka com retry e timeout otimizados
-   */
   private sendMessageToKafka(
     topic: string,
     messagePayload: MessagePayload,
@@ -262,16 +239,10 @@ export class KafkaMessagingProducer implements Producer, OnModuleInit, OnModuleD
       );
   }
 
-  /**
-   * Calcula delay exponencial para retry
-   */
   private calculateExponentialBackoff(retryCount: number): number {
     return this.config.baseTimeout * Math.pow(this.config.exponentialBackoffBase, retryCount);
   }
 
-  /**
-   * Processa resposta bem-sucedida
-   */
   private async handleSuccessfulResponse(
     originalMessage: Answer,
     response: CorrectLessonResponse,
@@ -279,8 +250,8 @@ export class KafkaMessagingProducer implements Producer, OnModuleInit, OnModuleD
   ): Promise<void> {
     try {
       const { grade, status } = response;
-      const transformedStatus = this.statusTransformer.transform(status);
 
+      const transformedStatus = this.statusTransformer.transform(status);
       // Atualiza mensagem com novos dados
       originalMessage.grade = grade;
       originalMessage.status = transformedStatus as ANSWER_STATUS;
@@ -295,16 +266,13 @@ export class KafkaMessagingProducer implements Producer, OnModuleInit, OnModuleD
       });
     } catch (error) {
       throw new ProducerError(
-        'Falha ao processar resposta bem-sucedida',
+        'Falha ao processar resposta do Kafka',
         ProducerErrorType.DATABASE_ERROR,
         error as Error,
       );
     }
   }
 
-  /**
-   * Processa resposta falhada
-   */
   private async handleFailedResponse(
     originalMessage: Answer,
     error: Error | string,
@@ -332,9 +300,6 @@ export class KafkaMessagingProducer implements Producer, OnModuleInit, OnModuleD
     }
   }
 
-  /**
-   * Trata erros gerais do método produce
-   */
   private async handleProduceError(error: Error, message: Answer): Promise<void> {
     this.logger.error('Erro no método produce', {
       submissionId: message.id.toString(),
@@ -353,9 +318,6 @@ export class KafkaMessagingProducer implements Producer, OnModuleInit, OnModuleD
     }
   }
 
-  /**
-   * Log da configuração atual
-   */
   private logConfiguration(): void {
     this.logger.log('Configuração do Kafka Producer', {
       maxRetries: this.config.maxRetries,
@@ -364,9 +326,6 @@ export class KafkaMessagingProducer implements Producer, OnModuleInit, OnModuleD
     });
   }
 
-  /**
-   * Log das métricas finais
-   */
   private logFinalMetrics(): void {
     this.logger.log('Métricas do Kafka Producer', {
       messagesSent: this.metrics.messagesSent,
@@ -375,9 +334,6 @@ export class KafkaMessagingProducer implements Producer, OnModuleInit, OnModuleD
     });
   }
 
-  /**
-   * Método público para obter métricas (útil para monitoramento)
-   */
   public getMetrics(): ProducerMetrics & { circuitBreaker: CircuitBreakerGetState } {
     return {
       ...this.metrics,

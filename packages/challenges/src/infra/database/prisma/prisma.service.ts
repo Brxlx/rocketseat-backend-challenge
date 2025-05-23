@@ -30,8 +30,8 @@ export class PrismaService
       errorFormat: 'pretty',
     });
   }
-  onModuleInit() {
-    this.$connect();
+  async onModuleInit() {
+    await this.$connect();
     this.$on('query', (event) => {
       const magenta = '\u001b[35m';
       this.logger.log(
@@ -56,7 +56,7 @@ export class PrismaService
       this.logger.log(`ERROR: ${event.message}`);
     });
   }
-  onModuleDestroy() {
+  async onModuleDestroy() {
     return this.$disconnect();
   }
 }
