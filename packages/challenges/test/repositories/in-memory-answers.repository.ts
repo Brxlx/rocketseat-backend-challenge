@@ -1,3 +1,4 @@
+import { ANSWER_STATUS } from '@/core/consts/answer-status';
 import { AnswerFilters } from '@/core/repositories/answer-filters';
 import { PaginationParams } from '@/core/repositories/pagination-params';
 import { AnswersRepository } from '@/domain/application/repositories/answers.repository';
@@ -84,5 +85,22 @@ export class InMemoryAnswersRepository implements AnswersRepository {
     this.items.push(answer);
 
     return this.items[this.items.length - 1];
+  }
+
+  async updateMessageStatus(id: string, status: ANSWER_STATUS): Promise<void> {
+    const answer = this.items.find((item) => item.id.toString() === id);
+    if (!answer) {
+      throw new Error('Answer not found');
+    }
+    answer.status = status;
+    return;
+  }
+  async updateAnswerDetails(answer: Answer): Promise<void> {
+    const index = this.items.findIndex((item) => item.id.toString() === answer.id.toString());
+    if (index === -1) {
+      throw new Error('Answer not found');
+    }
+    this.items[index] = answer;
+    return;
   }
 }

@@ -4,6 +4,8 @@ import { KafkaMessagingProducer } from '@/infra/Messaging/kafka-messaging.produc
 import { AnswersRepository } from '@/domain/application/repositories/answers.repository';
 import { EnvService } from '@/infra/env/env.service';
 import { Answer } from '@/domain/enterprise/entities/Answer';
+import { StatusTransformer } from '@/domain/application/gateways/Messaging/status-transformer';
+import { CircuitBreaker } from '@/domain/application/gateways/Circuit Breaker/circuit-breaker';
 
 /**
  * Interface que define a estrutura de uma mensagem enviada para o Kafka
@@ -23,15 +25,16 @@ interface SentMessage {
  */
 @Injectable()
 export class TestKafkaMessagingProducer extends KafkaMessagingProducer {
-  private isConnected = false;
   private sentMessages: SentMessage[] = [];
 
   constructor(
     kafkaClient: ClientKafka,
     answersRepository: AnswersRepository,
     envService: EnvService,
+    statusTransformer: StatusTransformer,
+    circuitBreaker: CircuitBreaker,
   ) {
-    super(kafkaClient, answersRepository, envService);
+    super(kafkaClient, answersRepository, envService, statusTransformer, circuitBreaker);
   }
 
   /**

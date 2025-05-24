@@ -5,6 +5,10 @@ import { EnvService } from '@/infra/env/env.service';
 import { EnvModule } from '@/infra/env/env.module';
 import { TestKafkaMessagingProducer } from './test-messaging-producer';
 import { DatabaseModule } from '@/infra/database/database.module';
+import { StatusTransformer } from '@/domain/application/gateways/Messaging/status-transformer';
+import { TestStatusTransformerService } from './test-status-transformer';
+import { CircuitBreaker } from '@/domain/application/gateways/Circuit Breaker/circuit-breaker';
+import { TestCircuitBreakerService } from 'test/Circuit Breaker/fake-circuit-breaker';
 
 @Module({
   imports: [
@@ -36,7 +40,15 @@ import { DatabaseModule } from '@/infra/database/database.module';
       provide: KafkaMessagingProducer,
       useClass: TestKafkaMessagingProducer,
     },
+    {
+      provide: StatusTransformer,
+      useClass: TestStatusTransformerService,
+    },
+    {
+      provide: CircuitBreaker,
+      useClass: TestCircuitBreakerService,
+    },
   ],
-  exports: [TestKafkaMessagingProducer],
+  exports: [TestKafkaMessagingProducer, StatusTransformer, CircuitBreaker],
 })
 export class TestMessagingModule {}
