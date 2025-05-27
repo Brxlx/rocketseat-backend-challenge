@@ -37,12 +37,16 @@ export class TestKafkaMessagingProducer extends KafkaMessagingProducer {
     super(kafkaClient, answersRepository, envService, statusTransformer, circuitBreaker);
   }
 
+  override async onModuleDestroy(): Promise<void> {
+    await super.onModuleDestroy();
+  }
+
   /**
    * Sobrescreve o método emit do producer base para capturar as mensagens
    * @param topic - Tópico Kafka
    * @param message - Mensagem a ser enviada
    */
-  override async produce(topic: string, message: Answer): Promise<Answer> {
+  async produce(topic: string, message: Answer): Promise<Answer> {
     // Registra a mensagem antes de enviá-la
     this.sentMessages.push({
       topic,

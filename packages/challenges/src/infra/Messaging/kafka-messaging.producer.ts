@@ -327,11 +327,12 @@ export class KafkaMessagingProducer implements Producer, OnModuleInit, OnModuleD
   }
 
   private logFinalMetrics(): void {
-    this.logger.log('Métricas do Kafka Producer', {
-      messagesSent: this.metrics.messagesSent,
-      messagesFailures: this.metrics.messagesFailures,
-      circuitBreakerState: this.circuitBreaker.getState(),
-    });
+    // this.logger.log('Métricas do Kafka Producer', {
+    //   messagesSent: this.metrics.messagesSent,
+    //   messagesFailures: this.metrics.messagesFailures,
+    //   circuitBreakerState: this.circuitBreaker.getState(),
+    // });
+    this.logger.log('Métricas do Kafka Producer', this.getMetrics());
   }
 
   public getMetrics(): ProducerMetrics & { circuitBreaker: CircuitBreakerGetState } {
